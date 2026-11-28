@@ -62,6 +62,13 @@ ru: {
   attach: "Фото или видео", voice: "Голосовое сообщение", rec: "Запись", cancel: "Отмена", sending: "Отправка…",
   noRec: "Этот браузер не умеет записывать голос.", noMic: "Нет доступа к микрофону. Разрешите его в настройках браузера.",
   needSql3: "Чтобы сохранять специальность, запустите в Supabase файл supabase-update-3.sql.",
+  groups: "Группы", studsN: "Студентов", subjN: "Предметов", showGrp: "Показать студентов", addToGrpS: "Добавить", addToGrp: "Добавить в группу",
+  syncBtn: "Загрузить предметы из расписания и записать на них студентов", syncBtnS: "Предметы", syncing: "Загружаю предметы из расписания…",
+  syncDone: "Предметов группы: %1 (новых: %2), записей студентов на предметы: %3.", grpFromSch: "Из расписания: предметов — %. Они появятся у студентов автоматически.",
+  grpNoSch: "Этой группы нет в расписании — предметы не добавятся автоматически.", pickGrp: "— выберите группу —", otherGrp: "Другая группа…", grpName: "Название группы",
+  noGroups: "Групп пока нет. Нажмите «Добавить группу».", linked: "Привязано предметов к преподавателям: %.", findS: "Поиск предмета, группы или преподавателя",
+  vedBtn: "Ведомость", vedT: "Ведомость", vedGrp: "Ведомость группы", dateL: "Дата", markL: "Оценка",
+  needSql4: "Чтобы предметы из расписания работали, запустите в Supabase файл supabase-update-4.sql.",
   spec: "Специальность", specs: "Специальности", addSpec: "+ Добавить специальность",
   specsSub: "Список для групп студентов. Если изменить название, оно поменяется и у всех студентов с этой специальностью.",
   addGroup: "Добавить группу", grpT: "Новая группа студентов", fioList: "ФИО студентов — по одному в строке",
@@ -120,6 +127,13 @@ tj: {
   attach: "Акс ё видео", voice: "Паёми овозӣ", rec: "Сабт", cancel: "Бекор", sending: "Фиристода мешавад…",
   noRec: "Ин браузер овозро сабт карда наметавонад.", noMic: "Ба микрофон дастрасӣ нест. Онро дар танзимоти браузер иҷозат диҳед.",
   needSql3: "Барои захираи ихтисос дар Supabase файли supabase-update-3.sql-ро иҷро кунед.",
+  groups: "Гурӯҳҳо", studsN: "Донишҷӯён", subjN: "Фанҳо", showGrp: "Нишон додани донишҷӯён", addToGrpS: "Илова", addToGrp: "Илова ба гурӯҳи",
+  syncBtn: "Фанҳоро аз ҷадвал гирифтан ва донишҷӯёнро ба онҳо сабт кардан", syncBtnS: "Фанҳо", syncing: "Фанҳо аз ҷадвал бор мешаванд…",
+  syncDone: "Фанҳои гурӯҳ: %1 (нав: %2), сабти донишҷӯён ба фанҳо: %3.", grpFromSch: "Аз ҷадвал: фанҳо — %. Онҳо ба донишҷӯён худкор пайдо мешаванд.",
+  grpNoSch: "Ин гурӯҳ дар ҷадвал нест — фанҳо худкор илова намешаванд.", pickGrp: "— гурӯҳро интихоб кунед —", otherGrp: "Гурӯҳи дигар…", grpName: "Номи гурӯҳ",
+  noGroups: "Ҳоло гурӯҳ нест. «Илова кардани гурӯҳ»-ро пахш кунед.", linked: "Фанҳо ба омӯзгорон пайваст шуданд: %.", findS: "Ҷустуҷӯи фан, гурӯҳ ё омӯзгор",
+  vedBtn: "Ведомост", vedT: "Ведомост", vedGrp: "Ведомости гурӯҳи", dateL: "Сана", markL: "Баҳо",
+  needSql4: "Барои кори фанҳо аз ҷадвал дар Supabase файли supabase-update-4.sql-ро иҷро кунед.",
   spec: "Ихтисос", specs: "Ихтисосҳо", addSpec: "+ Илова кардани ихтисос",
   specsSub: "Рӯйхат барои гурӯҳҳои донишҷӯён. Агар номро иваз кунед, он дар ҳамаи донишҷӯёни ин ихтисос низ иваз мешавад.",
   addGroup: "Илова кардани гурӯҳ", grpT: "Гурӯҳи нави донишҷӯён", fioList: "Ному насаби донишҷӯён — дар ҳар сатр як нафар",
@@ -380,7 +394,8 @@ function myGrades() {
         h += (w.length ? '<p>' + e(t("dayS")) + ': ' + wl(w) + '</p>' : '') +
           '<p>' + e(t("r1")) + ': ' + rv("r1") + ' · ' + e(t("r2")) + ': ' + rv("r2") + ' · ' + e(t("ex")) + ': ' + rv("ex") + '</p>';
       }
-      h += '<p style="margin-top:6px;color:var(--text)">' + e(t("tot")) + ': <b>' + total(o) + '</b></p></div>';
+      var mk = mark(o);
+      h += '<p style="margin-top:6px;color:var(--text)">' + e(t("tot")) + ': <b>' + total(o) + '</b>' + (mk ? ' · ' + e(t("markL")) + ': <b>' + mk + '</b>' : '') + '</p></div>';
     });
     $("myg").innerHTML = h + '</div>';
   });
@@ -453,7 +468,7 @@ function deptAnn(n) {
 var MF = { d: "", k: "", s: "" };
 function matV() {
   var v = $("clv"), canUp = isAdmin() || isTeacher();
-  var subjQ = canUp ? (isAdmin() ? sb.from("subjects").select("id,name,dept").order("name") : sb.from("subjects").select("id,name,dept").eq("teacher_id", ME.id).order("name")) : Promise.resolve({ data: [] });
+  var subjQ = canUp ? sb.from("subjects").select("*").order("name").then(function (r) { return { data: (r.data || []).filter(function (s) { return isAdmin() || mySubj(s); }) }; }) : Promise.resolve({ data: [] });
   Promise.all([subjQ, sb.from("subjects").select("id,name").order("name")]).then(function (rs) {
     var mine = rs[0].data || [], all = rs[1].data || [], sn = {};
     all.forEach(function (s) { sn[s.id] = s.name; });
@@ -534,12 +549,11 @@ function openMat(m) {
 /* ---------- мои предметы ---------- */
 function subjV() {
   var v = $("clv"), q = sb.from("subjects").select("*").order("name");
-  if (!isAdmin()) q = q.eq("teacher_id", ME.id);
   q.then(function (r) {
-    var ss = r.data || [];
+    var ss = (r.data || []).filter(function (s) { return isAdmin() || mySubj(s); });
     if (!ss.length) { v.innerHTML = '<div class="card"><p>' + e(t("noSubj")) + '</p></div>'; return; }
     if (!SUBJ || !ss.some(function (s) { return s.id === SUBJ; })) SUBJ = ss[0].id;
-    v.innerHTML = '<div class="ctl"><label>' + e(t("subject")) + '<select id="ssel">' + ss.map(function (s) { return '<option value="' + s.id + '"' + (s.id === SUBJ ? " selected" : "") + '>' + e(s.name) + ' · ' + e(deptName(s.dept)) + '</option>'; }).join("") + '</select></label></div><div id="sbody"></div>';
+    v.innerHTML = '<div class="ctl"><label>' + e(t("subject")) + '<select id="ssel">' + ss.map(function (s) { return '<option value="' + s.id + '"' + (s.id === SUBJ ? " selected" : "") + '>' + e(s.name) + ' · ' + e(s.grp || deptName(s.dept)) + '</option>'; }).join("") + '</select></label></div><div id="sbody"></div>';
     $("ssel").onchange = function () { SUBJ = +this.value; subjBody(ss.filter(function (s) { return s.id === SUBJ; })[0]); };
     subjBody(ss.filter(function (s) { return s.id === SUBJ; })[0]);
   });
@@ -548,7 +562,7 @@ function subjBody(s) {
   var b = $("sbody");
   b.innerHTML = '<form class="card cl-f" id="fsy"><h3>' + e(t("syl")) + '</h3><textarea name="y" maxlength="20000" style="min-height:160px">' + e(s.syllabus) + '</textarea><button class="btn2">' + e(t("save")) + '</button><p class="cl-msg" id="msy"></p></form>' +
     '<h2>' + e(t("studs")) + '</h2><div class="card"><div class="cl-f"><div class="row" style="gap:8px"><input class="cl-in" id="sgf" placeholder="' + e(t("grF")) + '" style="flex:1 1 140px"><select class="cl-in" id="sadd" style="flex:3 1 220px"></select><button class="cl-b pri" id="badd">' + e(t("addSt")) + '</button></div></div><div id="slst" style="margin-top:10px"></div></div>' +
-    '<h2>' + e(t("grades")) + '</h2><p class="sub">' + e(t("grHint")) + '</p><div class="row" style="gap:8px;margin-bottom:10px"><input type="date" class="cl-in" id="wkd" value="' + today() + '" style="width:auto"><button class="cl-b pri" id="bwk">' + e(t("day")) + '</button></div><p class="sub" id="semi"></p><div class="jt cl-tbl" id="gtbl"></div>';
+    '<h2>' + e(t("grades")) + '</h2><p class="sub">' + e(t("grHint")) + '</p><div class="row" style="gap:8px;margin-bottom:10px"><input type="date" class="cl-in" id="wkd" value="' + today() + '" style="width:auto"><button class="cl-b pri" id="bwk">' + e(t("day")) + '</button><button class="cl-b" id="bved">⬇ ' + e(t("vedBtn")) + '</button></div><p class="sub" id="semi"></p><div class="jt cl-tbl" id="gtbl"></div>';
   $("fsy").onsubmit = function (ev) {
     ev.preventDefault();
     sb.from("subjects").update({ syllabus: ev.target.y.value }).eq("id", s.id).then(function (r) { r.error ? fail($("msy"), r.error) : (s.syllabus = ev.target.y.value, msg($("msy"), t("saved"))); });
@@ -585,14 +599,26 @@ function subjBody(s) {
       }
       function dh(arr) { return arr.map(function (d) { return '<th>' + fdate(d).slice(0, 5) + '</th>'; }).join(""); }
       var head = si
-        ? '<tr><th class="nm" rowspan="2">' + e(t("st")) + '</th><th class="grp" colspan="' + (d1.length + 1) + '">' + e(t("p1")) + '</th><th class="grp" colspan="' + (d2.length + 1) + '">' + e(t("p2")) + '</th><th rowspan="2">' + e(t("ex")) + '</th><th rowspan="2">' + e(t("tot")) + '</th></tr>' +
+        ? '<tr><th class="nm" rowspan="2">' + e(t("st")) + '</th><th class="grp" colspan="' + (d1.length + 1) + '">' + e(t("p1")) + '</th><th class="grp" colspan="' + (d2.length + 1) + '">' + e(t("p2")) + '</th><th rowspan="2">' + e(t("ex")) + '</th><th rowspan="2">' + e(t("tot")) + '</th><th rowspan="2">' + e(t("markL")) + '</th></tr>' +
           '<tr>' + dh(d1) + '<th>' + e(t("r1")) + '</th>' + dh(d2) + '<th>' + e(t("r2")) + '</th></tr>'
-        : '<tr><th class="nm">' + e(t("st")) + '</th>' + dh(d1) + '<th>' + e(t("r1")) + '</th><th>' + e(t("r2")) + '</th><th>' + e(t("ex")) + '</th><th>' + e(t("tot")) + '</th></tr>';
+        : '<tr><th class="nm">' + e(t("st")) + '</th>' + dh(d1) + '<th>' + e(t("r1")) + '</th><th>' + e(t("r2")) + '</th><th>' + e(t("ex")) + '</th><th>' + e(t("tot")) + '</th><th>' + e(t("markL")) + '</th></tr>';
       function dc(sid, arr) { return arr.map(function (d) { return cell(sid, "w", d, 10); }).join(""); }
+      $("bved").onclick = function () {
+        var rows = [[t("vedT")], [t("subject"), s.name], s.grp ? [t("grp"), s.grp] : [], [t("teacher"), (s.teachers && s.teachers.length ? s.teachers.join(", ") : (ME.full_name || ""))], [t("dateL"), fdate(today())], []];
+        var hd = ["№", t("fio")].concat(d1.map(fdate), si ? [t("r1")] : [], d2.map(fdate), si ? [t("r2")] : [t("r1"), t("r2")], [t("ex"), t("tot"), t("markL")]);
+        rows.push(hd);
+        en.forEach(function (p, i) {
+          function v(kind, day) { var x = G[p.id + "|" + kind + "|" + day]; return x == null ? "" : x; }
+          var o = { r1: G[p.id + "|r1|2000-01-01"], r2: G[p.id + "|r2|2000-01-01"], ex: G[p.id + "|ex|2000-01-01"] };
+          rows.push([i + 1, p.full_name || p.login].concat(d1.map(function (d) { return v("w", d); }), si ? [v("r1", "2000-01-01")] : [], d2.map(function (d) { return v("w", d); }),
+            si ? [v("r2", "2000-01-01")] : [v("r1", "2000-01-01"), v("r2", "2000-01-01")], [v("ex", "2000-01-01"), total(o), mark(o)]));
+        });
+        csvDl(rows, "vedomost-" + fileSafe(s.name) + (s.grp ? "-" + fileSafe(s.grp) : "") + ".csv");
+      };
       $("gtbl").innerHTML = en.length ? '<table>' + head +
         en.map(function (p) {
           var o = { r1: G[p.id + "|r1|2000-01-01"], r2: G[p.id + "|r2|2000-01-01"], ex: G[p.id + "|ex|2000-01-01"] };
-          return '<tr><td class="nm">' + e(p.full_name || p.login) + '</td>' + dc(p.id, d1) + cell(p.id, "r1", "2000-01-01", 100) + dc(p.id, d2) + cell(p.id, "r2", "2000-01-01", 100) + cell(p.id, "ex", "2000-01-01", 100) + '<td class="res" data-tot="' + p.id + '">' + total(o) + '</td></tr>';
+          return '<tr><td class="nm">' + e(p.full_name || p.login) + '</td>' + dc(p.id, d1) + cell(p.id, "r1", "2000-01-01", 100) + dc(p.id, d2) + cell(p.id, "r2", "2000-01-01", 100) + cell(p.id, "ex", "2000-01-01", 100) + '<td class="res" data-tot="' + p.id + '">' + total(o) + '</td><td class="res" data-mk="' + p.id + '">' + mark(o) + '</td></tr>';
         }).join("") + '</table>' : '<p class="sub" style="padding:12px">' + e(t("empty")) + '</p>';
       $("gtbl").onchange = function (ev) {
         var el = ev.target, k = el.dataset && el.dataset.g; if (!k) return;
@@ -604,8 +630,9 @@ function subjBody(s) {
         p.then(function (r) {
           if (r.error) { el.className = "er"; el.title = r.error.message; return; }
           el.className = "sv"; if (val == null) delete G[k]; else G[k] = val;
-          var td = document.querySelector('[data-tot="' + a[0] + '"]');
-          if (td) td.textContent = total({ r1: G[a[0] + "|r1|2000-01-01"], r2: G[a[0] + "|r2|2000-01-01"], ex: G[a[0] + "|ex|2000-01-01"] });
+          var td = document.querySelector('[data-tot="' + a[0] + '"]'), tm = document.querySelector('[data-mk="' + a[0] + '"]'), oo = { r1: G[a[0] + "|r1|2000-01-01"], r2: G[a[0] + "|r2|2000-01-01"], ex: G[a[0] + "|ex|2000-01-01"] };
+          if (td) td.textContent = total(oo);
+          if (tm) tm.textContent = mark(oo);
         });
       };
     });
@@ -829,6 +856,143 @@ function groupDlg(room, ppl) {
   });
 }
 
+/* ---------- расписание → группы и предметы ---------- */
+// Электронное расписание сайта лежит в глобальной переменной SC (группы, специальности, занятия).
+function SCH() { return window.SC && Array.isArray(window.SC.groups) && Array.isArray(window.SC.lessons) ? window.SC : null; }
+function gkey(g) { return String(g || "").toLowerCase().replace(/\(.*?\)/g, "").replace(/[\s.]/g, ""); }
+function schedGroup(g) {
+  var sc = SCH(); if (!sc || !g) return null;
+  var ex = sc.groups.filter(function (x) { return x.id === g; })[0]; if (ex) return ex;
+  var m = sc.groups.filter(function (x) { return gkey(x.id) === gkey(g); });
+  return m.length === 1 ? m[0] : null;
+}
+var SPEC_CODE = { "Математика": "1-02 05 01", "Информатика": "1-02 05 05", "Математикаи амалӣ": "1-31 03 03-02", "Мат. физика": "1-02 05 03-01" };
+function specFor(schedSpec) {
+  var c = SPEC_CODE[schedSpec]; if (!c) return "";
+  return specList().filter(function (x) { return x === c || x.indexOf(c + " ") === 0; })[0] || "";
+}
+function nkey(n) { return String(n || "").toLowerCase().replace(/ё/g, "е").replace(/[^a-zа-яӣӯқғҳҷ0-9]+/g, ""); }
+function tkey(name) {
+  var w = String(name || "").replace(/ё/g, "е").replace(/\./g, ". ").split(/\s+/).filter(Boolean);
+  if (!w.length) return "";
+  return w[0].toLowerCase().replace(/[^a-zа-яӣӯқғҳҷ-]/g, "") + "|" + (w[1] || "").charAt(0).toLowerCase();
+}
+// предметы группы по расписанию: [{name, teachers:[...]}]; почти одинаковые названия сливаются
+function groupSubjects(gid) {
+  var sc = SCH(); if (!sc) return [];
+  var m = {};
+  sc.lessons.forEach(function (l) {
+    if (!l || !l.n || !l.y || !Array.isArray(l.g) || l.g.indexOf(gid) < 0) return;
+    var k = nkey(l.n); if (!k) return;
+    var o = m[k] || (m[k] = { name: String(l.n).trim(), teachers: [] });
+    if (String(l.n).trim().length > o.name.length) o.name = String(l.n).trim();
+    String(l.t || "").split(/\s*[,;]\s*/).forEach(function (x) { x = x.trim(); if (x && o.teachers.indexOf(x) < 0) o.teachers.push(x); });
+  });
+  var keys = Object.keys(m).sort(function (a, b) { return a.length - b.length; });
+  keys.forEach(function (k) {
+    if (k.length < 8 || !m[k]) return;
+    var big = keys.filter(function (k2) { return k2 !== k && k2.length > k.length && m[k2] && k2.indexOf(k) === 0; })[0];
+    if (big) { m[k].teachers.forEach(function (x) { if (m[big].teachers.indexOf(x) < 0) m[big].teachers.push(x); }); delete m[k]; }
+  });
+  return Object.keys(m).map(function (k) { return m[k]; }).sort(function (a, b) { return a.name.localeCompare(b.name); });
+}
+function teacherIndex(staff) {
+  var ix = {};
+  staff.filter(function (u) { return live(u) && (u.role === "teacher" || u.role === "admin"); }).forEach(function (u) {
+    var k = tkey(u.full_name); if (k) (ix[k] = ix[k] || []).push(u);
+  });
+  return ix;
+}
+function matchTeachers(names, ix) {
+  var ids = [];
+  (names || []).forEach(function (n) { (ix[tkey(n)] || []).forEach(function (u) { if (ids.indexOf(u.id) < 0) ids.push(u.id); }); });
+  return ids;
+}
+function mySubj(s) { return !!ME && (s.teacher_id === ME.id || (s.teacher_ids || []).indexOf(ME.id) > -1); }
+function chunks(a, n) { var r = []; for (var i = 0; i < a.length; i += n) r.push(a.slice(i, i + n)); return r; }
+function seq(items, fn) { return items.reduce(function (p, x) { return p.then(function () { return fn(x); }); }, Promise.resolve()); }
+function must(r) { if (r && r.error) throw r.error; return r; }
+
+// Создать недостающие предметы группы из расписания и записать на них всех студентов группы.
+function syncGroup(grp, deptHint) {
+  var sg = schedGroup(grp);
+  if (!sg) return Promise.resolve({ noSched: true, created: 0, enrolled: 0, total: 0 });
+  var list = groupSubjects(sg.id);
+  return Promise.all([
+    sb.from("subjects").select("*").eq("grp", grp),
+    sb.from("profiles").select("*").in("role", ["teacher", "admin"]),
+    sb.from("profiles").select("*").eq("role", "student").eq("grp", grp)
+  ]).then(function (rs) {
+    rs.forEach(must);
+    var have = {}, ix = teacherIndex(rs[1].data || []), studs = (rs[2].data || []).filter(live), all = (rs[0].data || []).slice();
+    all.forEach(function (s) { have[nkey(s.name)] = 1; });
+    var add = list.filter(function (x) { return !have[nkey(x.name)]; }).map(function (x) {
+      var ids = matchTeachers(x.teachers, ix), t0 = ids.length ? (rs[1].data || []).filter(function (u) { return u.id === ids[0]; })[0] : null;
+      return { name: x.name.slice(0, 200), grp: grp, dept: (t0 && t0.dept) || deptHint || 1, teachers: x.teachers, teacher_ids: ids, teacher_id: ids[0] || null, syllabus: "" };
+    });
+    return (add.length ? sb.from("subjects").insert(add).select() : Promise.resolve({ data: [] })).then(function (r) {
+      must(r); all = all.concat(r.data || []);
+      var sids = all.map(function (s) { return s.id; });
+      if (!sids.length || !studs.length) return { created: add.length, enrolled: 0, total: all.length };
+      return sb.from("enrollments").select("subject_id, student_id").in("subject_id", sids).then(function (r2) {
+        must(r2);
+        var got = {}; (r2.data || []).forEach(function (x) { got[x.subject_id + "|" + x.student_id] = 1; });
+        var rows = [];
+        sids.forEach(function (sid) { studs.forEach(function (p) { if (!got[sid + "|" + p.id]) rows.push({ subject_id: sid, student_id: p.id }); }); });
+        return seq(chunks(rows, 500), function (c) { return sb.from("enrollments").insert(c).then(must); }).then(function () { return { created: add.length, enrolled: rows.length, total: all.length }; });
+      });
+    });
+  });
+}
+// Привязать предметы к преподавателям по фамилии и инициалу (когда аккаунт преподавателя появился позже).
+function linkTeachers(subjects, profiles) {
+  var ix = teacherIndex(profiles), todo = [];
+  subjects.forEach(function (s) {
+    if (!s.teachers || !s.teachers.length) return;
+    var ids = matchTeachers(s.teachers, ix), cur = s.teacher_ids || [];
+    if (ids.some(function (id) { return cur.indexOf(id) < 0; })) {
+      var nids = cur.concat(ids.filter(function (id) { return cur.indexOf(id) < 0; }));
+      todo.push({ s: s, o: { teacher_ids: nids, teacher_id: s.teacher_id || nids[0] } });
+    }
+  });
+  return seq(todo, function (x) { return sb.from("subjects").update(x.o).eq("id", x.s.id).then(function (r) { if (!r.error) Object.assign(x.s, x.o); }); }).then(function () { return todo.length; });
+}
+
+/* ---------- оценки и ведомости ---------- */
+// шкала из калькулятора сайта: 91–100 «5», 76–90 «4», 51–75 «3», 45–50 Fx, ниже 45 F
+function mark(o) {
+  if (o.r1 == null || o.r2 == null || o.ex == null) return "";
+  var v = +total(o);
+  return v >= 91 ? "5" : v >= 76 ? "4" : v >= 51 ? "3" : v >= 45 ? "Fx" : "F";
+}
+function fileSafe(x) { return (lat(x) || String(x || "")).replace(/[^\w.-]+/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "").slice(0, 40) || "list"; }
+// ведомость группы: студенты × предметы, в ячейке «итог (оценка)»
+function groupSheet(grp) {
+  return Promise.all([
+    sb.from("subjects").select("*").eq("grp", grp).order("name"),
+    sb.from("profiles").select("*").eq("role", "student").eq("grp", grp).order("full_name")
+  ]).then(function (rs) {
+    rs.forEach(must);
+    var ss = rs[0].data || [], st = (rs[1].data || []).filter(live);
+    var ids = ss.map(function (s) { return s.id; });
+    return (ids.length ? sb.from("grades").select("*").in("subject_id", ids) : Promise.resolve({ data: [] })).then(function (r) {
+      must(r);
+      var G = {}; (r.data || []).forEach(function (g) { if (g.kind !== "w") G[g.subject_id + "|" + g.student_id + "|" + g.kind] = +g.value; });
+      var spec = (st[0] && st[0].spec) || "";
+      var rows = [[t("vedGrp") + " " + grp], spec ? [t("spec"), spec] : [], [t("dateL"), fdate(today())], [],
+        ["№", t("fio")].concat(ss.map(function (s) { return s.name; }))];
+      st.forEach(function (p, i) {
+        rows.push([i + 1, p.full_name || p.login].concat(ss.map(function (s) {
+          var o = { r1: G[s.id + "|" + p.id + "|r1"], r2: G[s.id + "|" + p.id + "|r2"], ex: G[s.id + "|" + p.id + "|ex"] }, tt = total(o), mk = mark(o);
+          return tt === "—" ? "" : tt + (mk ? " (" + mk + ")" : "");
+        })));
+      });
+      csvDl(rows, "vedomost-" + fileSafe(grp) + ".csv");
+      return st.length;
+    });
+  });
+}
+
 /* ---------- админ ---------- */
 var AQ = "", TMP = null;
 function rpc(name, args) { return sb.rpc(name, args).then(function (r) { if (r.error) throw r.error; return r; }); }
@@ -872,22 +1036,42 @@ function csvDl(rows, name) {
   document.body.appendChild(a); a.click(); setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
 }
 // Добавление целой группы: вставить ФИО по строкам → логины и пароли создаются сами
-function groupAddDlg(existing) {
+function syncText(x) { return x.noSched ? t("grpNoSch") : t("syncDone").replace("%1", x.total).replace("%2", x.created).replace("%3", x.enrolled); }
+function errText4(err) { return /grp|teacher_ids|teachers/.test(String(err && err.message)) && needSql(err) ? t("needSql4") : errText(err); }
+function groupOpts(sel, existing) {
+  var sc = SCH(), seen = {}, h = '<option value="">' + e(t("pickGrp")) + '</option>';
+  if (sc) sc.groups.forEach(function (g) { seen[g.id] = 1; h += '<option value="' + e(g.id) + '"' + (g.id === sel ? " selected" : "") + '>' + e(g.id + " · " + g.spec) + '</option>'; });
+  (existing || []).forEach(function (u) { var g = u.role === "student" && u.grp; if (g && !seen[g]) { seen[g] = 1; h += '<option value="' + e(g) + '"' + (g === sel ? " selected" : "") + '>' + e(g) + '</option>'; } });
+  if (sel && !seen[sel]) h += '<option value="' + e(sel) + '" selected>' + e(sel) + '</option>';
+  return h + '<option value="__other">' + e(t("otherGrp")) + '</option>';
+}
+function groupAddDlg(existing, preset) {
   var box = document.createElement("div"), ROWS = [], busy = false; box.className = "mdl";
   var used = {}; existing.forEach(function (u) { if (u.login) used[String(u.login).toLowerCase()] = 1; });
   box.innerHTML = '<div class="card cl-f" style="max-width:560px;width:100%;max-height:92vh;overflow:auto" id="gad"></div>';
   document.body.appendChild(box);
-  var c = box.querySelector("#gad"), G = { grp: "", dept: "", spec: "", names: "" };
+  var c = box.querySelector("#gad"), G = { grp: (preset && preset.grp) || "", dept: (preset && preset.dept) || "", spec: (preset && preset.spec) || "", names: "", sync: "" };
   function step1() {
-    c.innerHTML = '<h3>' + e(t("grpT")) + '</h3><p class="cl-note">' + e(t("grpHint")) + '</p>' +
-      '<label>' + e(t("grp")) + '<input class="cl-in" id="gg" maxlength="40" value="' + e(G.grp) + '" placeholder="101"></label>' +
+    c.innerHTML = '<h3>' + e(preset ? t("addToGrp") + " " + G.grp : t("grpT")) + '</h3><p class="cl-note">' + e(t("grpHint")) + '</p>' +
+      '<label>' + e(t("grp")) + '<select class="cl-in" id="ggs">' + groupOpts(G.grp, existing) + '</select></label>' +
+      '<input class="cl-in" id="gg" maxlength="40" value="' + e(G.grp) + '" placeholder="' + e(t("grpName")) + '" hidden>' +
+      '<p class="cl-note" id="gsi"></p>' +
       '<label>' + e(t("spec")) + '<select class="cl-in" id="gs">' + specOpts(G.spec) + '</select></label>' +
       '<label>' + e(t("dept")) + '<select class="cl-in" id="gd"><option value="">—</option>' + deptOpts(G.dept) + '</select></label>' +
       '<label>' + e(t("fioList")) + '<textarea class="cl-in" id="gn" style="min-height:200px" placeholder="' + e(t("fioPh")) + '">' + e(G.names) + '</textarea></label>' +
       '<div class="cl-act"><button type="button" class="btn2" style="margin:0" data-go="1">' + e(t("prep")) + '</button><button type="button" class="cl-b" data-x="1">' + e(t("close")) + '</button></div><p class="cl-msg" id="gm"></p>';
+    $("ggs").onchange = grpInfo; grpInfo();
+    if (G.spec) $("gs").value = G.spec;
+  }
+  function grpInfo() {
+    var sel = $("ggs"); if (!sel) return;
+    $("gg").hidden = sel.value !== "__other";
+    var sg = sel.value && sel.value !== "__other" ? schedGroup(sel.value) : null, n = sg ? groupSubjects(sg.id).length : 0;
+    $("gsi").textContent = sg ? t("grpFromSch").replace("%", n) : (sel.value && sel.value !== "__other" ? t("grpNoSch") : "");
+    if (sg) { var sp = specFor(sg.spec); if (sp) $("gs").value = sp; }
   }
   function step2() {
-    G.grp = $("gg").value.trim(); G.dept = $("gd").value; G.spec = $("gs").value; G.names = $("gn").value;
+    G.grp = ($("ggs").value === "__other" ? $("gg").value : $("ggs").value).trim(); G.dept = $("gd").value; G.spec = $("gs").value; G.names = $("gn").value;
     var seen = {}, names = G.names.split(/\r?\n/).map(function (x) { return x.replace(/^[\s\d.)\-–—]+/, "").replace(/\s+/g, " ").trim(); })
       .filter(function (x) { var k = x.toLowerCase(); if (!x || seen[k]) return false; seen[k] = 1; return true; });
     if (!G.grp) return msg($("gm"), t("grpNeed"), true);
@@ -905,7 +1089,7 @@ function groupAddDlg(existing) {
     var okN = ROWS.filter(function (r) { return r.st === "ok"; }).length;
     c.innerHTML = '<h3>' + e(t("grp")) + ' ' + e(G.grp) + ' · ' + ROWS.length + '</h3>' + (G.spec ? '<p class="cl-note">' + e(G.spec) + '</p>' : '') + table() +
       (finished
-        ? '<p class="cl-msg ' + (okN === ROWS.length ? "ok" : "bad") + '">' + e(t("made").replace("%1", okN).replace("%2", ROWS.length)) + '</p>' +
+        ? '<p class="cl-msg ' + (okN === ROWS.length ? "ok" : "bad") + '">' + e(t("made").replace("%1", okN).replace("%2", ROWS.length)) + '</p>' + (G.sync ? '<p class="cl-note">' + e(G.sync) + '</p>' : '') +
           '<div class="cl-act"><button type="button" class="cl-b pri" data-csv="1">⬇ ' + e(t("dlCsv")) + '</button><button type="button" class="cl-b" data-cpa="1">' + e(t("copyAll")) + '</button>' +
           (okN < ROWS.length ? '<button type="button" class="cl-b" data-go2="1">' + e(t("retry")) + '</button>' : '') + '<button type="button" class="btn2" style="margin:0" data-x="1">' + e(t("done")) + '</button></div>'
         : '<p class="cl-msg" id="gm"></p><div class="cl-act"><button type="button" class="btn2" style="margin:0" data-go2="1">' + e(t("createN").replace("%", ROWS.length)) + '</button><button type="button" class="cl-b" data-back="1">' + e(t("back")) + '</button></div>');
@@ -915,7 +1099,13 @@ function groupAddDlg(existing) {
     var todo = ROWS.filter(function (r) { return r.st !== "ok"; }), i = 0;
     [].forEach.call(c.querySelectorAll("button"), function (b) { b.disabled = true; });
     (function next() {
-      if (i >= todo.length) { busy = false; ROWS.forEach(function (r) { if (r.st === "ok") used[r.login] = 1; }); return draw(true); }
+      if (i >= todo.length) {
+        ROWS.forEach(function (r) { if (r.st === "ok") used[r.login] = 1; });
+        if (!ROWS.some(function (r) { return r.st === "ok"; })) { busy = false; return draw(true); }
+        var m2 = $("gm") || c.querySelector(".cl-msg"); if (m2) msg(m2, t("syncing"));
+        return syncGroup(G.grp, G.dept ? +G.dept : null).then(function (x) { G.sync = syncText(x); }, function (err) { G.sync = errText4(err); })
+          .then(function () { busy = false; draw(true); });
+      }
       var r = todo[i++], m = $("gm") || c.querySelector(".cl-msg");
       if (m) msg(m, t("made").replace("%1", ROWS.filter(function (x) { return x.st === "ok"; }).length).replace("%2", ROWS.length) + "…");
       createUser({ login: r.login, pw: r.pw, fio: r.fio, role: "student", dept: G.dept ? +G.dept : null, grp: G.grp, spec: G.spec })
@@ -944,10 +1134,11 @@ function userDlg(kind) {
     '<div class="row" style="gap:8px;flex-wrap:nowrap"><input class="cl-in" name="p" placeholder="' + e(t("pw")) + '" autocomplete="off" required style="flex:1"><button type="button" class="cl-b" data-g="1">' + e(t("genPw")) + '</button></div>' +
     (staff ? '<label>' + e(t("roleL")) + '<select name="r"><option value="teacher">' + e(t("role").teacher) + '</option><option value="admin">' + e(t("role").admin) + '</option></select></label>' +
       '<label>' + e(t("dept")) + '<select name="d"><option value="">—</option>' + deptOpts("") + '</select></label>'
-      : '<label>' + e(t("grp")) + '<input name="g" maxlength="40"></label><label>' + e(t("spec")) + '<select name="sp">' + specOpts("") + '</select></label><label>' + e(t("dept")) + '<select name="d"><option value="">—</option>' + deptOpts("") + '</select></label>') +
+      : '<label>' + e(t("grp")) + '<input name="g" maxlength="40" list="mf-grps" autocomplete="off"></label><datalist id="mf-grps">' + (SCH() ? SCH().groups.map(function (g) { return '<option value="' + e(g.id) + '">' + e(g.spec) + '</option>'; }).join("") : '') + '</datalist><label>' + e(t("spec")) + '<select name="sp">' + specOpts("") + '</select></label><label>' + e(t("dept")) + '<select name="d"><option value="">—</option>' + deptOpts("") + '</select></label>') +
     '<div class="cl-act"><button class="btn2" style="margin:0">' + e(t("create")) + '</button><button type="button" class="cl-b" data-x="1">' + e(t("close")) + '</button></div><p class="cl-msg" id="mnu"></p></form>';
   document.body.appendChild(box);
   var f = box.querySelector("form"); f.p.value = genPw(); f.f.focus();
+  if (f.g) f.g.oninput = function () { var sg = schedGroup(f.g.value.trim()), sp = sg && specFor(sg.spec); if (sp && f.sp) f.sp.value = sp; };
   box.onclick = function (ev) {
     var d = ev.target.dataset || {};
     if (ev.target === box || d.x) { box.remove(); if (box.dataset.ok) adminV(); }
@@ -963,10 +1154,16 @@ function userDlg(kind) {
     if (pw.length < 8) return msg(mm, t("pwShort"), true);
     if (!staff && f.sp.value && !SPEC_OK) return specReady().then(function (ok) { if (ok) f.requestSubmit ? f.requestSubmit() : f.onsubmit(ev); else msg(mm, t("needSql3"), true); });
     msg(mm, t("loading")); btn.disabled = true;
+    var extra = "";
     createUser({ login: l, pw: pw, fio: fio, role: rl, dept: dp, grp: gp, spec: staff ? "" : f.sp.value }).then(function () {
+      // студенту — предметы его группы из расписания; преподавателю — его предметы по фамилии
+      if (!staff && gp) return syncGroup(gp, dp).then(function (x) { extra = syncText(x); }, function (err) { extra = errText4(err); });
+      if (staff) return Promise.all([sb.from("subjects").select("*"), sb.from("profiles").select("*").in("role", ["teacher", "admin"])])
+        .then(function (rs) { return linkTeachers(rs[0].data || [], rs[1].data || []); }).then(function (n) { if (n) extra = t("linked").replace("%", n); }, function () {});
+    }).then(function () {
       box.dataset.ok = "1";
       f.innerHTML = '<h3>✓ ' + e(fio) + '</h3><p>' + e(t("created")) + '</p><pre style="background:var(--line);padding:10px 12px;border-radius:10px;font-size:16px;white-space:pre-wrap">' +
-        e(t("lg") + ": " + l + "\n" + t("pw") + ": " + pw + "\n" + location.origin + location.pathname) + '</pre>' +
+        e(t("lg") + ": " + l + "\n" + t("pw") + ": " + pw + "\n" + location.origin + location.pathname) + '</pre>' + (extra ? '<p class="cl-note">' + e(extra) + '</p>' : '') +
         '<div class="cl-act"><button type="button" class="cl-b pri" data-cp="1">' + e(t("copy")) + '</button><button type="button" class="cl-b" data-x="1">' + e(t("close")) + '</button></div>';
     }).catch(function (err) { btn.disabled = false; msg(mm, errText(err), true); });
   };
@@ -991,10 +1188,25 @@ function adminV() {
     function dept(u) { return '<td><select data-f="dept"><option value="">—</option>' + deptOpts(u.dept || "") + '</select></td>'; }
     function grp(u) { return '<td><input data-f="grp" value="' + e(u.grp || "") + '" maxlength="40" style="width:110px"></td>'; }
     function spc(u) { return '<td><select data-f="spec">' + specOpts(u.spec || "") + '</select></td>'; }
+    // группы: из студентов
+    var GR = {};
+    studs.forEach(function (u) { var g = u.grp || ""; if (!g) return; var o = GR[g] || (GR[g] = { n: 0, spec: "", dept: u.dept || "" }); o.n++; if (!o.spec && u.spec) o.spec = u.spec; });
+    var SN = {}; ss.forEach(function (x) { if (x.grp) SN[x.grp] = (SN[x.grp] || 0) + 1; });
+    function grpSection() {
+      var gl = Object.keys(GR).sort(function (a, b) { return a.localeCompare(b, "ru", { numeric: true }); });
+      return '<h2>' + e(t("groups")) + ' · ' + gl.length + '</h2>' + (gl.length ? '<div class="jt"><table id="tgr"><tr><th class="nm">' + e(t("grp")) + '</th><th>' + e(t("spec")) + '</th><th>' + e(t("studsN")) + '</th><th>' + e(t("subjN")) + '</th><th></th></tr>' +
+        gl.map(function (g) {
+          var o = GR[g], sg = schedGroup(g);
+          return '<tr data-g="' + e(g) + '"><td class="nm l"><b>' + e(g) + '</b></td><td>' + e(o.spec || (sg ? sg.spec : "—")) + '</td><td>' + o.n + '</td><td>' + (SN[g] || 0) + (sg ? '' : ' <span class="sub" title="' + e(t("grpNoSch")) + '">⚠</span>') + '</td>' +
+            '<td style="white-space:nowrap"><button class="cl-b" data-gv="1" title="' + e(t("showGrp")) + '">👁</button> <button class="cl-b pri" data-ga="1">➕ ' + e(t("addToGrpS")) + '</button> ' +
+            (sg ? '<button class="cl-b" data-gs="1" title="' + e(t("syncBtn")) + '">🔄 ' + e(t("syncBtnS")) + '</button> ' : '') + '<button class="cl-b" data-gx="1">⬇ ' + e(t("vedBtn")) + '</button></td></tr>';
+        }).join("") + '</table></div><p class="cl-msg" id="mgr"></p>' : '<p class="sub">' + e(t("noGroups")) + '</p>');
+    }
     function tbl(id, head, rows) { return '<div class="jt"><table id="' + id + '" class="cl-ut"><tr>' + head.map(function (h, i) { return '<th' + (i ? '' : ' class="nm"') + '>' + e(h) + '</th>'; }).join("") + '<th></th></tr>' + rows + '</table></div>'; }
     var h = (SET.ok ? '' : '<div class="card cl-warn"><p>' + e(t("needSql")) + '</p></div>') +
       '<div class="cl-bar"><button class="cl-b pri" data-nu="staff">➕ ' + e(t("addStaff")) + '</button><button class="cl-b pri" data-nu="student">➕ ' + e(t("addStud")) + '</button><button class="cl-b pri" data-ng="1">👥 ' + e(t("addGroup")) + '</button></div>' +
       '<input class="cl-in" id="uq" placeholder="🔍 ' + e(t("findU")) + '" value="' + e(AQ) + '" style="max-width:420px">' +
+      grpSection() +
       '<h2>' + e(t("staff")) + ' · ' + staff.length + '</h2>' +
       (staff.length ? tbl("tst", [t("fio"), t("lg"), t("roleL"), t("dept")], staff.map(function (u) { return '<tr data-u="' + u.id + '" data-q="' + srch(u) + '">' + nm(u) + '<td>' + roleSel(u, ["teacher", "admin"]) + '</td>' + dept(u) + acts(u) + '</tr>'; }).join("")) : '<p class="sub">' + e(t("empty")) + '</p>') +
       '<h2>' + e(t("students")) + ' · ' + studs.length + '</h2>' +
@@ -1018,8 +1230,9 @@ function adminV() {
       '<p class="cl-note" id="semh">' + e(si ? t("semHint").replace("%1", fdate(si.r1)).replace("%2", fdate(si.r2)) : t("semNone")) + '</p><div class="cl-act"><button class="cl-b pri" id="bsem">' + e(t("save")) + '</button></div><p class="cl-msg" id="msem"></p></div>';
     // предметы
     h += '<h2>' + e(t("subjects")) + '</h2><form class="card cl-f" id="fsb" style="margin-bottom:14px"><div class="row" style="gap:8px"><input class="cl-in" name="n" placeholder="' + e(t("title")) + '" maxlength="200" required style="flex:2 1 200px"><select class="cl-in" name="d" style="flex:1 1 160px">' + deptOpts(1) + '</select><select class="cl-in" name="tc" style="flex:1 1 160px">' + tOpts() + '</select><button class="cl-b pri">' + e(t("addSubj")) + '</button></div><p class="cl-msg" id="msb"></p></form>' +
-      '<div class="jt"><table id="stbl"><tr><th class="nm">' + e(t("subject")) + '</th><th>' + e(t("dept")) + '</th><th>' + e(t("teacher")) + '</th><th></th></tr>' +
-      ss.map(function (s) { return '<tr data-s="' + s.id + '"><td class="nm l"><input data-f="name" value="' + e(s.name) + '" style="width:220px"></td><td><select data-f="dept">' + deptOpts(s.dept) + '</select></td><td><select data-f="teacher_id">' + tOpts(s.teacher_id) + '</select></td><td><button class="cl-b pri" data-ss="1">' + e(t("save")) + '</button> <button class="cl-b dng" data-sd="1">✕</button></td></tr>'; }).join("") + '</table></div>';
+      '<input class="cl-in" id="sq" placeholder="🔍 ' + e(t("findS")) + '" style="max-width:420px">' +
+      '<div class="jt"><table id="stbl"><tr><th class="nm">' + e(t("subject")) + '</th><th>' + e(t("grp")) + '</th><th>' + e(t("dept")) + '</th><th>' + e(t("teacher")) + '</th><th></th></tr>' +
+      ss.map(function (s) { return '<tr data-s="' + s.id + '" data-sq="' + e((s.name + " " + (s.grp || "") + " " + (s.teachers || []).join(" ")).toLowerCase()) + '"><td class="nm l"><input data-f="name" value="' + e(s.name) + '" style="width:220px"></td><td>' + e(s.grp || "—") + '</td><td><select data-f="dept">' + deptOpts(s.dept) + '</select></td><td><select data-f="teacher_id">' + tOpts(s.teacher_id) + '</select></td><td><button class="cl-b pri" data-ss="1">' + e(t("save")) + '</button> <button class="cl-b dng" data-sd="1">✕</button></td></tr>'; }).join("") + '</table></div>';
     v.innerHTML = h;
 
     function vals(tr) {
@@ -1040,6 +1253,15 @@ function adminV() {
       var d = el.dataset, tr = el.closest("tr"), id = tr && tr.dataset.u, u = id && all.filter(function (x) { return x.id === id; })[0];
       if (d.nu) return userDlg(d.nu);
       if (d.ng) return groupAddDlg(all);
+      var gtr = el.closest("tr[data-g]");
+      if (gtr) {
+        var g = gtr.dataset.g, o = GR[g] || {};
+        if (d.gv) { AQ = g; $("uq").value = g; filt(); var tsd = $("tsd"); if (tsd) tsd.scrollIntoView({ behavior: "smooth", block: "start" }); }
+        if (d.ga) groupAddDlg(all, { grp: g, spec: o.spec || "", dept: o.dept || "" });
+        if (d.gs) { el.disabled = true; msg($("mgr"), t("syncing")); syncGroup(g, o.dept ? +o.dept : null).then(function (x) { msg($("mgr"), g + ": " + syncText(x)); setTimeout(adminV, 1500); }, function (err) { el.disabled = false; msg($("mgr"), errText4(err), true); }); }
+        if (d.gx) groupSheet(g).catch(function (err) { msg($("mgr"), errText4(err), true); });
+        return;
+      }
       if (!u) return;
       var name = u.full_name || u.login;
       if (d.sv) {
@@ -1047,7 +1269,10 @@ function adminV() {
         if ("spec" in o && (o.spec || null) === (u.spec || null)) delete o.spec;
         sb.from("profiles").update(o).eq("id", id).then(function (r) {
           flash(el, r);
-          if (!r.error) { Object.assign(u, o); if (id === ME.id) loadMe(); if (o.role && o.role !== wasRole) setTimeout(adminV, 600); }
+          if (!r.error) {
+            var wasGrp = u.grp; Object.assign(u, o); if (id === ME.id) loadMe(); if (o.role && o.role !== wasRole) setTimeout(adminV, 600);
+            if (u.role === "student" && o.grp && o.grp !== wasGrp) syncGroup(o.grp, u.dept).then(function (x) { if (!x.noSched) setTimeout(adminV, 300); }, function () {});
+          }
         });
       }
       if (d.pw) {
@@ -1095,6 +1320,9 @@ function adminV() {
         return Promise.all(ren.map(function (x) { return sb.from("profiles").update({ spec: x[1] }).eq("spec", x[0]); }));
       }).then(function () { msg($("msps"), t("saved")); setTimeout(adminV, 700); }, function (err) { msg($("msps"), errText(err), true); });
     };
+    $("sq").oninput = function () { var q = this.value.trim().toLowerCase(); [].forEach.call($("stbl").querySelectorAll("tr[data-sq]"), function (tr) { tr.style.display = !q || tr.dataset.sq.indexOf(q) > -1 ? "" : "none"; }); };
+    // предметы из расписания сами привязываются к преподавателям, у которых уже есть аккаунт
+    linkTeachers(ss, staff).then(function (n) { if (n && $("mgr")) msg($("mgr"), t("linked").replace("%", n)); }, function () {});
     $("stbl").onclick = function (ev) {
       var d = ev.target.dataset || {}, tr = ev.target.closest("tr"); if (!tr) return;
       if (d.ss) sb.from("subjects").update(vals(tr)).eq("id", tr.dataset.s).then(function (r) { flash(ev.target, r); });

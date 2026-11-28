@@ -15,6 +15,10 @@ create extension if not exists pgcrypto with schema extensions;
 -- ---------- 1. Пометка «удалён» ----------
 alter table public.profiles add column if not exists blocked boolean not null default false;
 alter table public.profiles add column if not exists spec text;
+alter table public.subjects add column if not exists grp text;
+alter table public.subjects add column if not exists teachers text[] not null default '{}';
+alter table public.subjects add column if not exists teacher_ids uuid[] not null default '{}';
+create index if not exists mf_subjects_grp on public.subjects (grp);
 
 create or replace function public.mf_is_admin() returns boolean
 language sql stable security definer set search_path = public as $$
@@ -156,7 +160,10 @@ create trigger mf_profile_new before insert on public.profiles
 
 create or replace function public.mf_teaches(p_subject bigint) returns boolean
 language sql stable security definer set search_path = public as $$
-  select public.mf_is_member() and exists (select 1 from public.subjects s where s.id = p_subject and s.teacher_id = auth.uid());
+  select public.mf_is_member() and exists (
+    select 1 from public.subjects s
+    where s.id = p_subject and (s.teacher_id = auth.uid() or auth.uid() = any (s.teacher_ids))
+  );
 $$;
 create or replace function public.mf_room_owner(p_room bigint) returns boolean
 language sql stable security definer set search_path = public as $$
@@ -169,7 +176,9 @@ language plpgsql security definer set search_path = public as $$
 begin
   if auth.uid() is not null and not public.mf_is_admin() then
     if new.name is distinct from old.name or new.dept is distinct from old.dept
-       or new.teacher_id is distinct from old.teacher_id or new.id is distinct from old.id then
+       or new.teacher_id is distinct from old.teacher_id or new.id is distinct from old.id
+       or new.grp is distinct from old.grp or new.teachers is distinct from old.teachers
+       or new.teacher_ids is distinct from old.teacher_ids then
       raise exception 'Преподаватель может менять только силлабус';
     end if;
   end if;
