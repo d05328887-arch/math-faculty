@@ -61,6 +61,11 @@ ru: {
   day: "+ День", p1: "1–8 неделя", p2: "9–16 неделя", opensOn: "Откроется %", dayS: "Дневные",
   attach: "Фото или видео", voice: "Голосовое сообщение", rec: "Запись", cancel: "Отмена", sending: "Отправка…",
   noRec: "Этот браузер не умеет записывать голос.", noMic: "Нет доступа к микрофону. Разрешите его в настройках браузера.",
+  addGroup: "Добавить группу", grpT: "Новая группа студентов", fioList: "ФИО студентов — по одному в строке",
+  fioPh: "Ахмедов Фаррух Рустамович\nСаидова Мадина Каримовна\n…", prep: "Подготовить", back: "Назад", createN: "Создать аккаунты: %",
+  made: "Создано %1 из %2", dlCsv: "Скачать таблицу (Excel)", copyAll: "Копировать всё", done: "Готово", retry: "Повторить ошибки",
+  noNames: "Впишите хотя бы одно ФИО.", grpNeed: "Укажите группу.", site: "Сайт",
+  grpHint: "Наберите или вставьте ФИО — можно из сообщения, документа или таблицы. Логины и пароли появятся сами; после создания скачайте таблицу и раздайте студентам.",
   lbl: { image: "📷 Фото", video: "🎥 Видео", audio: "🎤 Голосовое", file: "📎 Файл" },
   sec: { home: "Главная", today: "Сегодня", search: "Поиск", history: "История", depts: "Кафедры", schedule: "Расписание", rooms: "Аудитории", calc: "Калькулятор баллов", journal: "Журнал преподавателя", dean: "Деканат", news: "Новости", apply: "Абитуриенту", scores: "Баллы студентов", ann: "Объявления", mat: "Материалы", chat: "Чат", subj: "Мои предметы (баллы)" }
 },
@@ -111,6 +116,11 @@ tj: {
   day: "+ Рӯз", p1: "Ҳафтаи 1–8", p2: "Ҳафтаи 9–16", opensOn: "Аз % кушода мешавад", dayS: "Рӯзона",
   attach: "Акс ё видео", voice: "Паёми овозӣ", rec: "Сабт", cancel: "Бекор", sending: "Фиристода мешавад…",
   noRec: "Ин браузер овозро сабт карда наметавонад.", noMic: "Ба микрофон дастрасӣ нест. Онро дар танзимоти браузер иҷозат диҳед.",
+  addGroup: "Илова кардани гурӯҳ", grpT: "Гурӯҳи нави донишҷӯён", fioList: "Ному насаби донишҷӯён — дар ҳар сатр як нафар",
+  fioPh: "Аҳмедов Фаррух Рустамович\nСаидова Мадина Каримовна\n…", prep: "Омода кардан", back: "Бозгашт", createN: "Сохтани ҳисобҳо: %",
+  made: "Сохта шуд %1 аз %2", dlCsv: "Зеркашии ҷадвал (Excel)", copyAll: "Нусхаи ҳама", done: "Тайёр", retry: "Такрори хатоҳо",
+  noNames: "Ақаллан як ному насабро нависед.", grpNeed: "Гурӯҳро нишон диҳед.", site: "Сомона",
+  grpHint: "Ному насабҳоро нависед ё гузоред — аз паём, ҳуҷҷат ё ҷадвал. Логин ва парол худкор пайдо мешаванд; пас аз сохтан ҷадвалро зеркашӣ карда ба донишҷӯён диҳед.",
   lbl: { image: "📷 Акс", video: "🎥 Видео", audio: "🎤 Паёми овозӣ", file: "📎 Файл" },
   sec: { home: "Асосӣ", today: "Имрӯз", search: "Ҷустуҷӯ", history: "Таърих", depts: "Кафедраҳо", schedule: "Ҷадвал", rooms: "Аудиторияҳо", calc: "Ҳисобкунаки баҳо", journal: "Журнали омӯзгор", dean: "Деканат", news: "Хабарҳо", apply: "Ба довталаб", scores: "Баҳоҳои донишҷӯён", ann: "Эълонҳо", mat: "Маводҳо", chat: "Чат", subj: "Фанҳои ман (баҳоҳо)" }
 }};
@@ -801,7 +811,103 @@ var AQ = "", TMP = null;
 function rpc(name, args) { return sb.rpc(name, args).then(function (r) { if (r.error) throw r.error; return r; }); }
 // отдельный клиент, чтобы создание аккаунта не выкинуло администратора из его входа
 function tmpClient() { if (!TMP) TMP = window.supabase.createClient(CFG.url, CFG.key, { auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false, storageKey: "mf-admin-new" } }); return TMP; }
-function genPw() { var c = "abcdefghjkmnpqrstuvwxyz23456789", a = new Uint32Array(10), r = ""; crypto.getRandomValues(a); for (var i = 0; i < 10; i++) r += c[a[i] % c.length]; return r; }
+function genPw(n) { n = n || 10; var c = "abcdefghjkmnpqrstuvwxyz23456789", a = new Uint32Array(n), r = ""; crypto.getRandomValues(a); for (var i = 0; i < n; i++) r += c[a[i] % c.length]; return r; }
+// Создание аккаунта: сначала функцией в базе (без писем и лимитов), если её нет — обычной регистрацией.
+function createUser(o) {
+  return sb.rpc("mf_admin_create_user", { p_login: o.login, p_password: o.pw, p_full_name: o.fio, p_role: o.role, p_dept: o.dept, p_grp: o.grp || "" }).then(function (r) {
+    if (!r.error) return r.data;
+    if (/занят/i.test(r.error.message)) throw new Error(t("taken") + " (" + o.login + ")");
+    if (needSql(r.error) || /permission denied/i.test(r.error.message)) return viaSignUp(o);
+    throw r.error;
+  });
+}
+function viaSignUp(o) {
+  return tmpClient().auth.signUp({ email: o.login + "@" + DOMAIN, password: o.pw, options: { data: { full_name: o.fio } } }).then(function (r) {
+    if (r.error) throw (/registered|exists|already/i.test(r.error.message) ? new Error(t("taken") + " (" + o.login + ")") : r.error);
+    var u = r.data && r.data.user;
+    if (!u || (u.identities && !u.identities.length)) throw new Error(t("taken") + " (" + o.login + ")");
+    try { TMP.auth.signOut({ scope: "local" }).catch(function () {}); } catch (x) {}
+    return rpc("mf_admin_setup_user", { p_id: u.id, p_login: o.login, p_full_name: o.fio, p_role: o.role, p_dept: o.dept, p_grp: o.grp || "" }).then(function () { return u.id; });
+  });
+}
+// ФИО → латинский логин: «Ахмедов Фаррух Рустамович» → «akhmedov.f»
+var TR = { "а": "a", "б": "b", "в": "v", "г": "g", "ғ": "gh", "д": "d", "е": "e", "ё": "yo", "ж": "zh", "з": "z", "и": "i", "ӣ": "i", "й": "y", "к": "k", "қ": "q", "л": "l", "м": "m", "н": "n", "о": "o", "п": "p", "р": "r", "с": "s", "т": "t", "у": "u", "ӯ": "u", "ф": "f", "х": "kh", "ҳ": "h", "ц": "ts", "ч": "ch", "ҷ": "j", "ш": "sh", "щ": "sch", "ъ": "", "ы": "y", "ь": "", "э": "e", "ю": "yu", "я": "ya" };
+function lat(w) { return String(w || "").toLowerCase().split("").map(function (c) { return TR[c] !== undefined ? TR[c] : /[a-z0-9]/.test(c) ? c : ""; }).join(""); }
+function makeLogin(fio, used) {
+  var w = fio.split(/\s+/).filter(Boolean), base = lat(w[0]).slice(0, 22) || "student", i1 = lat(w[1]).charAt(0), i2 = lat(w[2]).charAt(0);
+  var tries = [i1 ? base + "." + i1 : base, i1 && i2 ? base + "." + i1 + i2 : null].filter(Boolean);
+  for (var k = 0; k < tries.length; k++) if (tries[k].length >= 3 && !used[tries[k]]) { used[tries[k]] = 1; return tries[k]; }
+  for (var n = 2; n < 1000; n++) { var c = tries[0] + n; if (c.length >= 3 && !used[c]) { used[c] = 1; return c; } }
+  return base + Date.now() % 100000;
+}
+function csvDl(rows, name) {
+  var txt = "﻿" + rows.map(function (r) { return r.map(function (x) { x = String(x == null ? "" : x); return /[";\n]/.test(x) ? '"' + x.replace(/"/g, '""') + '"' : x; }).join(";"); }).join("\r\n");
+  var a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([txt], { type: "text/csv;charset=utf-8" })); a.download = name;
+  document.body.appendChild(a); a.click(); setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+}
+// Добавление целой группы: вставить ФИО по строкам → логины и пароли создаются сами
+function groupAddDlg(existing) {
+  var box = document.createElement("div"), ROWS = [], busy = false; box.className = "mdl";
+  var used = {}; existing.forEach(function (u) { if (u.login) used[String(u.login).toLowerCase()] = 1; });
+  box.innerHTML = '<div class="card cl-f" style="max-width:560px;width:100%;max-height:92vh;overflow:auto" id="gad"></div>';
+  document.body.appendChild(box);
+  var c = box.querySelector("#gad"), G = { grp: "", dept: "", names: "" };
+  function step1() {
+    c.innerHTML = '<h3>' + e(t("grpT")) + '</h3><p class="cl-note">' + e(t("grpHint")) + '</p>' +
+      '<label>' + e(t("grp")) + '<input class="cl-in" id="gg" maxlength="40" value="' + e(G.grp) + '" placeholder="101"></label>' +
+      '<label>' + e(t("dept")) + '<select class="cl-in" id="gd"><option value="">—</option>' + deptOpts(G.dept) + '</select></label>' +
+      '<label>' + e(t("fioList")) + '<textarea class="cl-in" id="gn" style="min-height:200px" placeholder="' + e(t("fioPh")) + '">' + e(G.names) + '</textarea></label>' +
+      '<div class="cl-act"><button type="button" class="btn2" style="margin:0" data-go="1">' + e(t("prep")) + '</button><button type="button" class="cl-b" data-x="1">' + e(t("close")) + '</button></div><p class="cl-msg" id="gm"></p>';
+  }
+  function step2() {
+    G.grp = $("gg").value.trim(); G.dept = $("gd").value; G.names = $("gn").value;
+    var seen = {}, names = G.names.split(/\r?\n/).map(function (x) { return x.replace(/^[\s\d.)\-–—]+/, "").replace(/\s+/g, " ").trim(); })
+      .filter(function (x) { var k = x.toLowerCase(); if (!x || seen[k]) return false; seen[k] = 1; return true; });
+    if (!G.grp) return msg($("gm"), t("grpNeed"), true);
+    if (!names.length) return msg($("gm"), t("noNames"), true);
+    var u2 = Object.assign({}, used);
+    ROWS = names.map(function (n) { return { fio: n.slice(0, 120), login: makeLogin(n, u2), pw: genPw(8), st: "" }; });
+    draw(false);
+  }
+  function table() {
+    return '<div class="jt"><table><tr><th>№</th><th class="nm">' + e(t("fio")) + '</th><th>' + e(t("lg")) + '</th><th>' + e(t("pw")) + '</th><th></th></tr>' +
+      ROWS.map(function (r, i) { return '<tr><td>' + (i + 1) + '</td><td class="nm l">' + e(r.fio) + '</td><td>' + e(r.login) + '</td><td><code>' + e(r.pw) + '</code></td><td>' + (r.st === "ok" ? "✓" : r.st ? '<span class="bad" title="' + e(r.st) + '">⚠ ' + e(r.st) + '</span>' : "") + '</td></tr>'; }).join("") + '</table></div>';
+  }
+  function draw(finished) {
+    var okN = ROWS.filter(function (r) { return r.st === "ok"; }).length;
+    c.innerHTML = '<h3>' + e(t("grp")) + ' ' + e(G.grp) + ' · ' + ROWS.length + '</h3>' + table() +
+      (finished
+        ? '<p class="cl-msg ' + (okN === ROWS.length ? "ok" : "bad") + '">' + e(t("made").replace("%1", okN).replace("%2", ROWS.length)) + '</p>' +
+          '<div class="cl-act"><button type="button" class="cl-b pri" data-csv="1">⬇ ' + e(t("dlCsv")) + '</button><button type="button" class="cl-b" data-cpa="1">' + e(t("copyAll")) + '</button>' +
+          (okN < ROWS.length ? '<button type="button" class="cl-b" data-go2="1">' + e(t("retry")) + '</button>' : '') + '<button type="button" class="btn2" style="margin:0" data-x="1">' + e(t("done")) + '</button></div>'
+        : '<p class="cl-msg" id="gm"></p><div class="cl-act"><button type="button" class="btn2" style="margin:0" data-go2="1">' + e(t("createN").replace("%", ROWS.length)) + '</button><button type="button" class="cl-b" data-back="1">' + e(t("back")) + '</button></div>');
+  }
+  function run() {
+    if (busy) return; busy = true; box.dataset.ok = "1";
+    var todo = ROWS.filter(function (r) { return r.st !== "ok"; }), i = 0;
+    [].forEach.call(c.querySelectorAll("button"), function (b) { b.disabled = true; });
+    (function next() {
+      if (i >= todo.length) { busy = false; ROWS.forEach(function (r) { if (r.st === "ok") used[r.login] = 1; }); return draw(true); }
+      var r = todo[i++], m = $("gm") || c.querySelector(".cl-msg");
+      if (m) msg(m, t("made").replace("%1", ROWS.filter(function (x) { return x.st === "ok"; }).length).replace("%2", ROWS.length) + "…");
+      createUser({ login: r.login, pw: r.pw, fio: r.fio, role: "student", dept: G.dept ? +G.dept : null, grp: G.grp })
+        .then(function () { r.st = "ok"; }, function (err) { r.st = (err && err.message) || String(err); })
+        .then(next);
+    })();
+  }
+  function plain() { return ROWS.filter(function (r) { return r.st === "ok"; }).map(function (r, i) { return (i + 1) + ". " + r.fio + " — " + t("lg") + ": " + r.login + ", " + t("pw") + ": " + r.pw; }).join("\n") + "\n" + location.origin + location.pathname; }
+  box.onclick = function (ev) {
+    var b = ev.target.closest ? ev.target.closest("button") : null, d = b ? b.dataset : {};
+    if ((ev.target === box || d.x) && !busy) { box.remove(); if (box.dataset.ok) adminV(); return; }
+    if (!b || b.disabled) return;
+    if (d.go) step2();
+    if (d.back) { step1(); }
+    if (d.go2) run();
+    if (d.csv) csvDl([["№", t("fio"), t("grp"), t("lg"), t("pw"), t("site")]].concat(ROWS.filter(function (r) { return r.st === "ok"; }).map(function (r, i) { return [i + 1, r.fio, G.grp, r.login, r.pw, location.origin + location.pathname]; })), "gruppa-" + (lat(G.grp) || G.grp.replace(/[^\w-]/g, "") || "list") + ".csv");
+    if (d.cpa && navigator.clipboard) navigator.clipboard.writeText(plain()).then(function () { b.textContent = t("copied"); }, function () {});
+  };
+  step1();
+}
 function userDlg(kind) {
   var staff = kind === "staff", box = document.createElement("div"); box.className = "mdl";
   box.innerHTML = '<form class="card cl-f" style="max-width:440px;width:100%"><h3>' + e(staff ? t("newStaffT") : t("newStudT")) + '</h3>' +
@@ -828,13 +934,7 @@ function userDlg(kind) {
     if (!/^[a-z0-9._-]{3,30}$/.test(l)) return msg(mm, t("lgHint"), true);
     if (pw.length < 8) return msg(mm, t("pwShort"), true);
     msg(mm, t("loading")); btn.disabled = true;
-    tmpClient().auth.signUp({ email: l + "@" + DOMAIN, password: pw, options: { data: { full_name: fio } } }).then(function (r) {
-      if (r.error) throw (/registered|exists|already/i.test(r.error.message) ? new Error(t("taken")) : r.error);
-      var u = r.data && r.data.user;
-      if (!u || (u.identities && !u.identities.length)) throw new Error(t("taken"));
-      try { TMP.auth.signOut({ scope: "local" }).catch(function () {}); } catch (x) {}
-      return rpc("mf_admin_setup_user", { p_id: u.id, p_login: l, p_full_name: fio, p_role: rl, p_dept: dp, p_grp: gp });
-    }).then(function () {
+    createUser({ login: l, pw: pw, fio: fio, role: rl, dept: dp, grp: gp }).then(function () {
       box.dataset.ok = "1";
       f.innerHTML = '<h3>✓ ' + e(fio) + '</h3><p>' + e(t("created")) + '</p><pre style="background:var(--line);padding:10px 12px;border-radius:10px;font-size:16px;white-space:pre-wrap">' +
         e(t("lg") + ": " + l + "\n" + t("pw") + ": " + pw + "\n" + location.origin + location.pathname) + '</pre>' +
@@ -863,7 +963,7 @@ function adminV() {
     function grp(u) { return '<td><input data-f="grp" value="' + e(u.grp || "") + '" maxlength="40" style="width:110px"></td>'; }
     function tbl(id, head, rows) { return '<div class="jt"><table id="' + id + '" class="cl-ut"><tr>' + head.map(function (h, i) { return '<th' + (i ? '' : ' class="nm"') + '>' + e(h) + '</th>'; }).join("") + '<th></th></tr>' + rows + '</table></div>'; }
     var h = (SET.ok ? '' : '<div class="card cl-warn"><p>' + e(t("needSql")) + '</p></div>') +
-      '<div class="cl-bar"><button class="cl-b pri" data-nu="staff">➕ ' + e(t("addStaff")) + '</button><button class="cl-b pri" data-nu="student">➕ ' + e(t("addStud")) + '</button></div>' +
+      '<div class="cl-bar"><button class="cl-b pri" data-nu="staff">➕ ' + e(t("addStaff")) + '</button><button class="cl-b pri" data-nu="student">➕ ' + e(t("addStud")) + '</button><button class="cl-b pri" data-ng="1">👥 ' + e(t("addGroup")) + '</button></div>' +
       '<input class="cl-in" id="uq" placeholder="🔍 ' + e(t("findU")) + '" value="' + e(AQ) + '" style="max-width:420px">' +
       '<h2>' + e(t("staff")) + ' · ' + staff.length + '</h2>' +
       (staff.length ? tbl("tst", [t("fio"), t("lg"), t("roleL"), t("dept")], staff.map(function (u) { return '<tr data-u="' + u.id + '" data-q="' + srch(u) + '">' + nm(u) + '<td>' + roleSel(u, ["teacher", "admin"]) + '</td>' + dept(u) + acts(u) + '</tr>'; }).join("")) : '<p class="sub">' + e(t("empty")) + '</p>') +
@@ -905,6 +1005,7 @@ function adminV() {
       var el = ev.target.closest ? ev.target.closest("button") : null; if (!el) return;
       var d = el.dataset, tr = el.closest("tr"), id = tr && tr.dataset.u, u = id && all.filter(function (x) { return x.id === id; })[0];
       if (d.nu) return userDlg(d.nu);
+      if (d.ng) return groupAddDlg(all);
       if (!u) return;
       var name = u.full_name || u.login;
       if (d.sv) {
