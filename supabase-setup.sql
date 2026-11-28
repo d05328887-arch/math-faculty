@@ -14,6 +14,7 @@ create extension if not exists pgcrypto with schema extensions;
 
 -- ---------- 1. Пометка «удалён» ----------
 alter table public.profiles add column if not exists blocked boolean not null default false;
+alter table public.profiles add column if not exists spec text;
 
 create or replace function public.mf_is_admin() returns boolean
 language sql stable security definer set search_path = public as $$
@@ -36,7 +37,8 @@ begin
       raise exception 'Только администратор может удалять пользователей';
     end if;
     if new.role is distinct from old.role or new.login is distinct from old.login
-       or new.dept is distinct from old.dept or new.grp is distinct from old.grp or new.id is distinct from old.id then
+       or new.dept is distinct from old.dept or new.grp is distinct from old.grp
+       or new.spec is distinct from old.spec or new.id is distinct from old.id then
       raise exception 'Эти данные меняет только администратор';
     end if;
   end if;

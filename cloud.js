@@ -61,6 +61,9 @@ ru: {
   day: "+ День", p1: "1–8 неделя", p2: "9–16 неделя", opensOn: "Откроется %", dayS: "Дневные",
   attach: "Фото или видео", voice: "Голосовое сообщение", rec: "Запись", cancel: "Отмена", sending: "Отправка…",
   noRec: "Этот браузер не умеет записывать голос.", noMic: "Нет доступа к микрофону. Разрешите его в настройках браузера.",
+  needSql3: "Чтобы сохранять специальность, запустите в Supabase файл supabase-update-3.sql.",
+  spec: "Специальность", specs: "Специальности", addSpec: "+ Добавить специальность",
+  specsSub: "Список для групп студентов. Если изменить название, оно поменяется и у всех студентов с этой специальностью.",
   addGroup: "Добавить группу", grpT: "Новая группа студентов", fioList: "ФИО студентов — по одному в строке",
   fioPh: "Ахмедов Фаррух Рустамович\nСаидова Мадина Каримовна\n…", prep: "Подготовить", back: "Назад", createN: "Создать аккаунты: %",
   made: "Создано %1 из %2", dlCsv: "Скачать таблицу (Excel)", copyAll: "Копировать всё", done: "Готово", retry: "Повторить ошибки",
@@ -116,6 +119,9 @@ tj: {
   day: "+ Рӯз", p1: "Ҳафтаи 1–8", p2: "Ҳафтаи 9–16", opensOn: "Аз % кушода мешавад", dayS: "Рӯзона",
   attach: "Акс ё видео", voice: "Паёми овозӣ", rec: "Сабт", cancel: "Бекор", sending: "Фиристода мешавад…",
   noRec: "Ин браузер овозро сабт карда наметавонад.", noMic: "Ба микрофон дастрасӣ нест. Онро дар танзимоти браузер иҷозат диҳед.",
+  needSql3: "Барои захираи ихтисос дар Supabase файли supabase-update-3.sql-ро иҷро кунед.",
+  spec: "Ихтисос", specs: "Ихтисосҳо", addSpec: "+ Илова кардани ихтисос",
+  specsSub: "Рӯйхат барои гурӯҳҳои донишҷӯён. Агар номро иваз кунед, он дар ҳамаи донишҷӯёни ин ихтисос низ иваз мешавад.",
   addGroup: "Илова кардани гурӯҳ", grpT: "Гурӯҳи нави донишҷӯён", fioList: "Ному насаби донишҷӯён — дар ҳар сатр як нафар",
   fioPh: "Аҳмедов Фаррух Рустамович\nСаидова Мадина Каримовна\n…", prep: "Омода кардан", back: "Бозгашт", createN: "Сохтани ҳисобҳо: %",
   made: "Сохта шуд %1 аз %2", dlCsv: "Зеркашии ҷадвал (Excel)", copyAll: "Нусхаи ҳама", done: "Тайёр", retry: "Такрори хатоҳо",
@@ -137,6 +143,19 @@ function addDays(d, n) { var x = new Date(d + "T12:00:00"); x.setDate(x.getDate(
 function semInfo() { var d = SET.sem; if (!d || !/^\d{4}-\d{2}-\d{2}$/.test(d)) return null; return { start: d, r1: addDays(d, 56), r2: addDays(d, 112) }; }
 function opensOf(kind) { var si = semInfo(); if (!si || kind === "w") return null; var d = kind === "r1" ? si.r1 : si.r2; return today() < d ? d : null; }
 function fsize(n) { return n > 1048576 ? (n / 1048576).toFixed(1) + " МБ" : Math.max(1, Math.round(n / 1024)) + " КБ"; }
+// специальности: список задаёт администратор (по умолчанию — специальности факультета из списка ХГУ)
+var DEF_SPECS = ["1-02 05 01 — Математика", "1-31 03 03-02 — Прикладная математика", "1-02 05 03-01 — Математика. Физика", "1-02 05 05 — Информатика"];
+function specList() { return SET.specs || DEF_SPECS; }
+function specOpts(sel) {
+  var l = specList().slice(); if (sel && l.indexOf(sel) < 0) l.push(sel);
+  return '<option value="">—</option>' + l.map(function (x) { return '<option value="' + e(x) + '"' + (x === sel ? " selected" : "") + '>' + e(x) + '</option>'; }).join("");
+}
+var SPEC_OK = null; // есть ли в базе колонка «специальность»
+function specReady() {
+  if (SPEC_OK) return Promise.resolve(true);
+  return sb.from("profiles").select("spec").limit(1).then(function (r) { SPEC_OK = !r.error; return SPEC_OK; }, function () { return false; });
+}
+function setSpec(id, spec) { return spec ? sb.from("profiles").update({ spec: spec }).eq("id", id).then(function (r) { if (r.error) throw r.error; }) : Promise.resolve(); }
 function deptOpts(sel, withFaculty) {
   var h = withFaculty ? '<option value="">' + e(t("faculty")) + '</option>' : '';
   for (var i = 1; i <= 5; i++) h += '<option value="' + i + '"' + (String(sel) === String(i) ? " selected" : "") + '>' + e(X.dept(i - 1)) + '</option>';
@@ -197,8 +216,12 @@ function errText(err) { return needSql(err) ? t("needSql") : t("err") + ": " + (
 
 function loadSettings() {
   return sb.from("mf_settings").select("*").then(function (r) {
-    SET.ok = !r.error; SET.perms = null; SET.sem = null;
-    (r.data || []).forEach(function (x) { if (x.key === "perms") SET.perms = x.value; if (x.key === "semester") SET.sem = x.value && x.value.start || null; });
+    SET.ok = !r.error; SET.perms = null; SET.sem = null; SET.specs = null;
+    (r.data || []).forEach(function (x) {
+      if (x.key === "perms") SET.perms = x.value;
+      if (x.key === "semester") SET.sem = x.value && x.value.start || null;
+      if (x.key === "specs" && x.value && Array.isArray(x.value.list)) SET.specs = x.value.list;
+    });
   }, function () { SET.ok = false; });
 }
 function loadMe() {
@@ -325,7 +348,7 @@ function loginV() {
     return;
   }
   var h = '<div class="card"><h3 style="font-size:20px">' + e(ME.full_name || ME.login) + '</h3><p>' + e(t("lg")) + ': ' + e(ME.login) + ' · ' + e(t("role")[ME.role]) +
-    (ME.dept ? ' · ' + e(deptName(ME.dept)) : '') + (ME.grp ? ' · ' + e(t("grp")) + ' ' + e(ME.grp) : '') + '</p>' +
+    (ME.dept ? ' · ' + e(deptName(ME.dept)) : '') + (ME.grp ? ' · ' + e(t("grp")) + ' ' + e(ME.grp) : '') + '</p>' + (ME.spec ? '<p>' + e(t("spec")) + ': ' + e(ME.spec) + '</p>' : '') +
     (ME.role === "pending" ? '<p style="margin-top:10px;color:var(--text)">' + e(t("pending")) + '</p>' : '') +
     '<div class="cl-act">' + ((isTeacher() || isAdmin()) ? '<a class="cl-b" href="#subj">' + e(t("subj")) + '</a>' : '') + (isAdmin() ? '<a class="cl-b" href="#admin">' + e(t("admin")) + '</a>' : '') +
     '<button class="cl-b dng" id="bout">' + e(t("out")) + '</button></div></div><div id="myg"></div>';
@@ -814,6 +837,9 @@ function tmpClient() { if (!TMP) TMP = window.supabase.createClient(CFG.url, CFG
 function genPw(n) { n = n || 10; var c = "abcdefghjkmnpqrstuvwxyz23456789", a = new Uint32Array(n), r = ""; crypto.getRandomValues(a); for (var i = 0; i < n; i++) r += c[a[i] % c.length]; return r; }
 // Создание аккаунта: сначала функцией в базе (без писем и лимитов), если её нет — обычной регистрацией.
 function createUser(o) {
+  return createUser0(o).then(function (id) { return o.spec && id ? setSpec(id, o.spec).then(function () { return id; }) : id; });
+}
+function createUser0(o) {
   return sb.rpc("mf_admin_create_user", { p_login: o.login, p_password: o.pw, p_full_name: o.fio, p_role: o.role, p_dept: o.dept, p_grp: o.grp || "" }).then(function (r) {
     if (!r.error) return r.data;
     if (/занят/i.test(r.error.message)) throw new Error(t("taken") + " (" + o.login + ")");
@@ -851,20 +877,22 @@ function groupAddDlg(existing) {
   var used = {}; existing.forEach(function (u) { if (u.login) used[String(u.login).toLowerCase()] = 1; });
   box.innerHTML = '<div class="card cl-f" style="max-width:560px;width:100%;max-height:92vh;overflow:auto" id="gad"></div>';
   document.body.appendChild(box);
-  var c = box.querySelector("#gad"), G = { grp: "", dept: "", names: "" };
+  var c = box.querySelector("#gad"), G = { grp: "", dept: "", spec: "", names: "" };
   function step1() {
     c.innerHTML = '<h3>' + e(t("grpT")) + '</h3><p class="cl-note">' + e(t("grpHint")) + '</p>' +
       '<label>' + e(t("grp")) + '<input class="cl-in" id="gg" maxlength="40" value="' + e(G.grp) + '" placeholder="101"></label>' +
+      '<label>' + e(t("spec")) + '<select class="cl-in" id="gs">' + specOpts(G.spec) + '</select></label>' +
       '<label>' + e(t("dept")) + '<select class="cl-in" id="gd"><option value="">—</option>' + deptOpts(G.dept) + '</select></label>' +
       '<label>' + e(t("fioList")) + '<textarea class="cl-in" id="gn" style="min-height:200px" placeholder="' + e(t("fioPh")) + '">' + e(G.names) + '</textarea></label>' +
       '<div class="cl-act"><button type="button" class="btn2" style="margin:0" data-go="1">' + e(t("prep")) + '</button><button type="button" class="cl-b" data-x="1">' + e(t("close")) + '</button></div><p class="cl-msg" id="gm"></p>';
   }
   function step2() {
-    G.grp = $("gg").value.trim(); G.dept = $("gd").value; G.names = $("gn").value;
+    G.grp = $("gg").value.trim(); G.dept = $("gd").value; G.spec = $("gs").value; G.names = $("gn").value;
     var seen = {}, names = G.names.split(/\r?\n/).map(function (x) { return x.replace(/^[\s\d.)\-–—]+/, "").replace(/\s+/g, " ").trim(); })
       .filter(function (x) { var k = x.toLowerCase(); if (!x || seen[k]) return false; seen[k] = 1; return true; });
     if (!G.grp) return msg($("gm"), t("grpNeed"), true);
     if (!names.length) return msg($("gm"), t("noNames"), true);
+    if (G.spec && !SPEC_OK) return specReady().then(function (ok) { if (ok) step2(); else msg($("gm"), t("needSql3"), true); });
     var u2 = Object.assign({}, used);
     ROWS = names.map(function (n) { return { fio: n.slice(0, 120), login: makeLogin(n, u2), pw: genPw(8), st: "" }; });
     draw(false);
@@ -875,7 +903,7 @@ function groupAddDlg(existing) {
   }
   function draw(finished) {
     var okN = ROWS.filter(function (r) { return r.st === "ok"; }).length;
-    c.innerHTML = '<h3>' + e(t("grp")) + ' ' + e(G.grp) + ' · ' + ROWS.length + '</h3>' + table() +
+    c.innerHTML = '<h3>' + e(t("grp")) + ' ' + e(G.grp) + ' · ' + ROWS.length + '</h3>' + (G.spec ? '<p class="cl-note">' + e(G.spec) + '</p>' : '') + table() +
       (finished
         ? '<p class="cl-msg ' + (okN === ROWS.length ? "ok" : "bad") + '">' + e(t("made").replace("%1", okN).replace("%2", ROWS.length)) + '</p>' +
           '<div class="cl-act"><button type="button" class="cl-b pri" data-csv="1">⬇ ' + e(t("dlCsv")) + '</button><button type="button" class="cl-b" data-cpa="1">' + e(t("copyAll")) + '</button>' +
@@ -890,7 +918,7 @@ function groupAddDlg(existing) {
       if (i >= todo.length) { busy = false; ROWS.forEach(function (r) { if (r.st === "ok") used[r.login] = 1; }); return draw(true); }
       var r = todo[i++], m = $("gm") || c.querySelector(".cl-msg");
       if (m) msg(m, t("made").replace("%1", ROWS.filter(function (x) { return x.st === "ok"; }).length).replace("%2", ROWS.length) + "…");
-      createUser({ login: r.login, pw: r.pw, fio: r.fio, role: "student", dept: G.dept ? +G.dept : null, grp: G.grp })
+      createUser({ login: r.login, pw: r.pw, fio: r.fio, role: "student", dept: G.dept ? +G.dept : null, grp: G.grp, spec: G.spec })
         .then(function () { r.st = "ok"; }, function (err) { r.st = (err && err.message) || String(err); })
         .then(next);
     })();
@@ -903,7 +931,7 @@ function groupAddDlg(existing) {
     if (d.go) step2();
     if (d.back) { step1(); }
     if (d.go2) run();
-    if (d.csv) csvDl([["№", t("fio"), t("grp"), t("lg"), t("pw"), t("site")]].concat(ROWS.filter(function (r) { return r.st === "ok"; }).map(function (r, i) { return [i + 1, r.fio, G.grp, r.login, r.pw, location.origin + location.pathname]; })), "gruppa-" + (lat(G.grp) || G.grp.replace(/[^\w-]/g, "") || "list") + ".csv");
+    if (d.csv) csvDl([["№", t("fio"), t("grp"), t("spec"), t("lg"), t("pw"), t("site")]].concat(ROWS.filter(function (r) { return r.st === "ok"; }).map(function (r, i) { return [i + 1, r.fio, G.grp, G.spec, r.login, r.pw, location.origin + location.pathname]; })), "gruppa-" + (lat(G.grp) || G.grp.replace(/[^\w-]/g, "") || "list") + ".csv");
     if (d.cpa && navigator.clipboard) navigator.clipboard.writeText(plain()).then(function () { b.textContent = t("copied"); }, function () {});
   };
   step1();
@@ -916,7 +944,7 @@ function userDlg(kind) {
     '<div class="row" style="gap:8px;flex-wrap:nowrap"><input class="cl-in" name="p" placeholder="' + e(t("pw")) + '" autocomplete="off" required style="flex:1"><button type="button" class="cl-b" data-g="1">' + e(t("genPw")) + '</button></div>' +
     (staff ? '<label>' + e(t("roleL")) + '<select name="r"><option value="teacher">' + e(t("role").teacher) + '</option><option value="admin">' + e(t("role").admin) + '</option></select></label>' +
       '<label>' + e(t("dept")) + '<select name="d"><option value="">—</option>' + deptOpts("") + '</select></label>'
-      : '<label>' + e(t("grp")) + '<input name="g" maxlength="40"></label><label>' + e(t("dept")) + '<select name="d"><option value="">—</option>' + deptOpts("") + '</select></label>') +
+      : '<label>' + e(t("grp")) + '<input name="g" maxlength="40"></label><label>' + e(t("spec")) + '<select name="sp">' + specOpts("") + '</select></label><label>' + e(t("dept")) + '<select name="d"><option value="">—</option>' + deptOpts("") + '</select></label>') +
     '<div class="cl-act"><button class="btn2" style="margin:0">' + e(t("create")) + '</button><button type="button" class="cl-b" data-x="1">' + e(t("close")) + '</button></div><p class="cl-msg" id="mnu"></p></form>';
   document.body.appendChild(box);
   var f = box.querySelector("form"); f.p.value = genPw(); f.f.focus();
@@ -933,8 +961,9 @@ function userDlg(kind) {
     if (!fio) return;
     if (!/^[a-z0-9._-]{3,30}$/.test(l)) return msg(mm, t("lgHint"), true);
     if (pw.length < 8) return msg(mm, t("pwShort"), true);
+    if (!staff && f.sp.value && !SPEC_OK) return specReady().then(function (ok) { if (ok) f.requestSubmit ? f.requestSubmit() : f.onsubmit(ev); else msg(mm, t("needSql3"), true); });
     msg(mm, t("loading")); btn.disabled = true;
-    createUser({ login: l, pw: pw, fio: fio, role: rl, dept: dp, grp: gp }).then(function () {
+    createUser({ login: l, pw: pw, fio: fio, role: rl, dept: dp, grp: gp, spec: staff ? "" : f.sp.value }).then(function () {
       box.dataset.ok = "1";
       f.innerHTML = '<h3>✓ ' + e(fio) + '</h3><p>' + e(t("created")) + '</p><pre style="background:var(--line);padding:10px 12px;border-radius:10px;font-size:16px;white-space:pre-wrap">' +
         e(t("lg") + ": " + l + "\n" + t("pw") + ": " + pw + "\n" + location.origin + location.pathname) + '</pre>' +
@@ -957,10 +986,11 @@ function adminV() {
       return '<td style="white-space:nowrap"><button class="cl-b pri" data-sv="1">' + e(t("save")) + '</button> <button class="cl-b" data-pw="1" title="' + e(t("pwBtn")) + '">🔑</button>' +
         (u.id === ME.id ? '' : ' <button class="cl-b dng" data-del="1" title="' + e(t("delUser")) + '">🗑 ' + e(t("delUser")) + '</button>') + '</td>';
     }
-    function srch(u) { return e(((u.full_name || "") + " " + (u.login || "") + " " + (u.grp || "")).toLowerCase()); }
+    function srch(u) { return e(((u.full_name || "") + " " + (u.login || "") + " " + (u.grp || "") + " " + (u.spec || "")).toLowerCase()); }
     function nm(u) { return '<td class="nm l"><input data-f="full_name" value="' + e(u.full_name || "") + '" maxlength="120" style="width:220px"></td><td>' + e(u.login) + '</td>'; }
     function dept(u) { return '<td><select data-f="dept"><option value="">—</option>' + deptOpts(u.dept || "") + '</select></td>'; }
     function grp(u) { return '<td><input data-f="grp" value="' + e(u.grp || "") + '" maxlength="40" style="width:110px"></td>'; }
+    function spc(u) { return '<td><select data-f="spec">' + specOpts(u.spec || "") + '</select></td>'; }
     function tbl(id, head, rows) { return '<div class="jt"><table id="' + id + '" class="cl-ut"><tr>' + head.map(function (h, i) { return '<th' + (i ? '' : ' class="nm"') + '>' + e(h) + '</th>'; }).join("") + '<th></th></tr>' + rows + '</table></div>'; }
     var h = (SET.ok ? '' : '<div class="card cl-warn"><p>' + e(t("needSql")) + '</p></div>') +
       '<div class="cl-bar"><button class="cl-b pri" data-nu="staff">➕ ' + e(t("addStaff")) + '</button><button class="cl-b pri" data-nu="student">➕ ' + e(t("addStud")) + '</button><button class="cl-b pri" data-ng="1">👥 ' + e(t("addGroup")) + '</button></div>' +
@@ -968,7 +998,7 @@ function adminV() {
       '<h2>' + e(t("staff")) + ' · ' + staff.length + '</h2>' +
       (staff.length ? tbl("tst", [t("fio"), t("lg"), t("roleL"), t("dept")], staff.map(function (u) { return '<tr data-u="' + u.id + '" data-q="' + srch(u) + '">' + nm(u) + '<td>' + roleSel(u, ["teacher", "admin"]) + '</td>' + dept(u) + acts(u) + '</tr>'; }).join("")) : '<p class="sub">' + e(t("empty")) + '</p>') +
       '<h2>' + e(t("students")) + ' · ' + studs.length + '</h2>' +
-      (studs.length ? tbl("tsd", [t("fio"), t("lg"), t("grp"), t("dept")], studs.map(function (u) { return '<tr data-u="' + u.id + '" data-q="' + srch(u) + '">' + nm(u) + grp(u) + dept(u) + acts(u) + '</tr>'; }).join("")) : '<p class="sub">' + e(t("empty")) + '</p>') +
+      (studs.length ? tbl("tsd", [t("fio"), t("lg"), t("grp"), t("spec"), t("dept")], studs.map(function (u) { return '<tr data-u="' + u.id + '" data-q="' + srch(u) + '">' + nm(u) + grp(u) + spc(u) + dept(u) + acts(u) + '</tr>'; }).join("")) : '<p class="sub">' + e(t("empty")) + '</p>') +
       (pend.length ? '<h2>' + e(t("pendingL")) + ' · ' + pend.length + '</h2>' + tbl("tpn", [t("fio"), t("lg"), t("roleL"), t("grp"), t("dept")], pend.map(function (u) { return '<tr data-u="' + u.id + '" data-q="' + srch(u) + '" class="warn">' + nm(u) + '<td>' + roleSel(u, ["pending", "student", "teacher", "admin"]) + '</td>' + grp(u) + dept(u) + acts(u) + '</tr>'; }).join("")) : '') +
       (gone.length ? '<details class="card" style="margin-top:18px"><summary style="cursor:pointer;font-weight:700">' + e(t("removed")) + ' · ' + gone.length + '</summary><div class="jt" style="margin-top:8px"><table>' +
         gone.map(function (u) { return '<tr data-u="' + u.id + '" data-q="' + srch(u) + '"><td class="nm l">' + e(u.full_name || "") + '</td><td>' + e(u.login) + '</td><td>' + e(t("role")[u.role] || u.role) + (u.grp ? ' · ' + e(u.grp) : '') + '</td><td><button class="cl-b pri" data-res="1">' + e(t("restore")) + '</button></td></tr>'; }).join("") + '</table></div></details>' : '');
@@ -978,6 +1008,10 @@ function adminV() {
       SECS.map(function (k) {
         return '<tr><td class="nm l">' + e(L[k] || k) + '</td><td>' + (k === "subj" ? '—' : '<input type="checkbox" data-pr="student|' + k + '"' + (ps.indexOf(k) > -1 ? " checked" : "") + '>') + '</td><td><input type="checkbox" data-pr="teacher|' + k + '"' + (pt.indexOf(k) > -1 ? " checked" : "") + '></td></tr>';
       }).join("") + '</table></div><div class="cl-act"><button class="cl-b pri" id="bperm">' + e(t("save")) + '</button></div><p class="cl-msg" id="mperm"></p>';
+    // специальности
+    h += '<h2>' + e(t("specs")) + '</h2><p class="sub">' + e(t("specsSub")) + '</p><div class="card cl-f" id="spc">' +
+      specList().map(function (x) { return '<div class="row" style="gap:8px;flex-wrap:nowrap"><input class="cl-in" data-sp="1" data-old="' + e(x) + '" value="' + e(x) + '" maxlength="120" style="flex:1"><button type="button" class="cl-b dng" data-spx="1">✕</button></div>'; }).join("") +
+      '<div class="cl-act"><button type="button" class="cl-b" id="bspa">' + e(t("addSpec")) + '</button><button type="button" class="cl-b pri" id="bsps">' + e(t("save")) + '</button></div><p class="cl-msg" id="msps"></p></div>';
     // семестр
     var si = semInfo();
     h += '<h2>' + e(t("sem")) + '</h2><div class="card cl-f"><label>' + e(t("semStart")) + ' <input type="date" class="cl-in" id="semd" value="' + e(SET.sem || "") + '" style="width:auto"></label>' +
@@ -1010,6 +1044,7 @@ function adminV() {
       var name = u.full_name || u.login;
       if (d.sv) {
         var o = vals(tr), wasRole = u.role;
+        if ("spec" in o && (o.spec || null) === (u.spec || null)) delete o.spec;
         sb.from("profiles").update(o).eq("id", id).then(function (r) {
           flash(el, r);
           if (!r.error) { Object.assign(u, o); if (id === ME.id) loadMe(); if (o.role && o.role !== wasRole) setTimeout(adminV, 600); }
@@ -1040,6 +1075,25 @@ function adminV() {
         $("semh").textContent = s2 ? t("semHint").replace("%1", fdate(s2.r1)).replace("%2", fdate(s2.r2)) : t("semNone");
         msg($("msem"), t("saved"));
       });
+    };
+    $("spc").onclick = function (ev) { if (ev.target.dataset && ev.target.dataset.spx) ev.target.parentNode.remove(); };
+    $("bspa").onclick = function () {
+      this.parentNode.insertAdjacentHTML("beforebegin", '<div class="row" style="gap:8px;flex-wrap:nowrap"><input class="cl-in" data-sp="1" data-old="" value="" maxlength="120" style="flex:1" placeholder="1-00 00 00 — ' + e(t("title")) + '"><button type="button" class="cl-b dng" data-spx="1">✕</button></div>');
+      var ins = $("spc").querySelectorAll("[data-sp]"); ins[ins.length - 1].focus();
+    };
+    $("bsps").onclick = function () {
+      var list = [], ren = [], seen = {};
+      [].forEach.call($("spc").querySelectorAll("[data-sp]"), function (el) {
+        var v = el.value.replace(/\s+/g, " ").trim(), o = el.dataset.old;
+        if (!v || seen[v]) return; seen[v] = 1; list.push(v);
+        if (o && o !== v) ren.push([o, v]);
+      });
+      sb.from("mf_settings").upsert({ key: "specs", value: { list: list }, updated_at: new Date().toISOString() }).then(function (r) {
+        if (r.error) throw r.error;
+        SET.specs = list;
+        // переименованную специальность меняем и у студентов
+        return Promise.all(ren.map(function (x) { return sb.from("profiles").update({ spec: x[1] }).eq("spec", x[0]); }));
+      }).then(function () { msg($("msps"), t("saved")); setTimeout(adminV, 700); }, function (err) { msg($("msps"), errText(err), true); });
     };
     $("stbl").onclick = function (ev) {
       var d = ev.target.dataset || {}, tr = ev.target.closest("tr"); if (!tr) return;
