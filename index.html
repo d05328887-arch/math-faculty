@@ -4,6 +4,17 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Факультет математики — ХГУ имени академика Б. Гафурова</title>
+<meta name="description" content="Факультет математики Худжандского государственного университета имени академика Б. Гафурова: кафедры, расписание занятий, свободные аудитории, калькулятор баллов, личные баллы студентов и информация для абитуриентов.">
+<link rel="canonical" href="https://d05328887-arch.github.io/math-faculty/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Факультет математики ХГУ">
+<meta property="og:title" content="Факультет математики — ХГУ имени академика Б. Гафурова">
+<meta property="og:description" content="Расписание, свободные аудитории, баллы студентов, кафедры и информация для абитуриентов. С 1932 года.">
+<meta property="og:url" content="https://d05328887-arch.github.io/math-faculty/">
+<meta property="og:image" content="https://d05328887-arch.github.io/math-faculty/icon-512.png">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:locale:alternate" content="tg_TJ">
+<meta name="twitter:card" content="summary">
 <style>
 :root{--bg:#f4f6fb;--card:#fff;--text:#18202f;--muted:#5d6881;--accent:#1d4ed8;--line:#e1e6f0;--sh:0 4px 18px rgba(20,40,90,.08);box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0b101c;--card:#151c2e;--text:#e8ecf6;--muted:#9aa5bf;--accent:#7aa2ff;--line:#263050;--sh:0 4px 18px rgba(0,0,0,.35);color-scheme:dark}}
@@ -19,17 +30,7 @@ nav button.on{background:var(--accent);color:#fff}
 .hero{position:relative;overflow:hidden;background:linear-gradient(135deg,#0a1f55,#1d4ed8 60%,#0e7490);color:#fff;text-align:center;padding:72px 20px 80px}
 .hero i{position:absolute;font-style:normal;font-family:Georgia,serif;color:rgba(255,255,255,.13);animation:fl 9s ease-in-out infinite;user-select:none}
 @keyframes fl{50%{transform:translateY(-18px) rotate(6deg)}}
-.tk{display:flex;align-items:center;gap:10px;border-top:1px solid var(--line);font-size:14px;overflow:hidden;height:34px}
-.tk[hidden]{display:none}
-.tk-l{flex:none;padding:0 10px 0 14px;font-weight:700;color:var(--accent);white-space:nowrap}
-.tk-w{flex:1;overflow:hidden;-webkit-mask-image:linear-gradient(90deg,transparent,#000 24px,#000 calc(100% - 24px),transparent);mask-image:linear-gradient(90deg,transparent,#000 24px,#000 calc(100% - 24px),transparent)}
-.tk-t{display:inline-flex;white-space:nowrap;animation:tk linear infinite;will-change:transform}
-.tk-w:hover .tk-t,.tk-w:focus-within .tk-t{animation-play-state:paused}
-.tk-t a{color:var(--text);text-decoration:none;padding-right:48px}
-.tk-t a:hover{color:var(--accent)}
-.tk-t b{color:var(--muted);font-weight:600;margin-right:6px}
-@keyframes tk{from{transform:translateX(0)}to{transform:translateX(-50%)}}
-@media (prefers-reduced-motion:reduce){.hero i,.v,.tk-t{animation:none!important}.tk-w{overflow-x:auto}}
+@media (prefers-reduced-motion:reduce){.hero i,.v{animation:none!important}}
 .hero small{position:relative;opacity:.85;text-transform:uppercase;letter-spacing:.06em;font-size:13px}
 .hero h1{position:relative;margin:14px auto;max-width:800px;font-size:clamp(30px,6vw,50px);line-height:1.15}
 .hero p{position:relative;max-width:640px;margin:0 auto 26px;opacity:.92}
@@ -88,7 +89,7 @@ td.gr[class*=" g"]{color:#fff;background:var(--gc);border-radius:10px;font-size:
 </style>
 </head>
 <body>
-<header><nav id="nav"></nav><div id="tick" class="tk" hidden></div></header>
+<header><nav id="nav"></nav></header>
 <div id="app"></div>
 <footer id="foot"></footer>
 <script>
@@ -225,7 +226,7 @@ function jsave(){try{localStorage.setItem("jr",JSON.stringify(JD));}catch(e){}}
 function jget(){var k=JG+"|"+JS,j=JD[k]||(JD[k]={dates:[],st:[]});if(!Array.isArray(j.dates))j.dates=[];if(!Array.isArray(j.st))j.st=[];if(!Array.isArray(j.rb))j.rb=[];while(j.rb.length<j.dates.length)j.rb.push(1);return j;}
 function ea(x){return String(x).replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;");}
 var JC=[];try{JC=JSON.parse(localStorage.getItem("jsub")||"[]");}catch(e){}
-var JX={ru:{day:"Оценки за день",date:"Дата",rb:"Рубеж",sum:"Итоги",stn:"Студентов",avg:"Средний итог",newS:"Название предмета",delday:"Удалить день",other:"＋ Другой предмет…",del:"Удалить студента?",ph:"Али Рахимов\nВали Садыков",nod:"Пока нет оценок за этот день",pr:"Ведомость",sign:"Преподаватель",abs:"Отсутствовал",bk:"Сохранить копию",ld:"Загрузить копию",ok:"Копия загружена",bad:"Не удалось прочитать файл",conf:"Заменить текущие данные журнала данными из копии?",pa:"Пропуски",att:"Н — пропуск",risk:"Риск",all:"Всем (пустым)",xl:"Из Excel/CSV",card:"Карточка студента",avs:"Средний итог по предметам",pw:"Пароль",pw1:"Введите пароль",pw2:"Новый пароль (пусто — убрать)",pwbad:"Неверный пароль",sd:"Распределение оценок",dy:"Средний балл по дням",stT:"Студенты",nmL:"ФИО",lgL:"Логин",psL:"Пароль",addB:"Добавить",kcT:"Логин и пароль студента",kcS:"Сохранить",more:"Дополнительно",eName:"Введите ФИО студента",eDup:"Такой студент уже есть в этом списке",eLg:"Логин: только латинские буквы и цифры, от 3 до 20 знаков",eLgT:"Такой логин уже занят другим студентом",ePw:"Пароль: не короче 6 знаков (баллы шифруются этим паролем)",eBoth:"Введите и логин, и пароль (или оставьте оба пустыми — они создадутся сами)",hintC:"Логин и пароль можно не вводить — они создадутся сами; потом их можно изменить кнопкой 🔑 в строке студента.",nsT:"Новый студент (группа, предметы, логин)",nsP:"Выберите группу — появятся её предметы по расписанию.",nsNo:"В расписании этой группы предметов нет. Выберите предмет в журнале ниже и добавьте студента там.",nsS:"Предметы группы (по расписанию) — отметьте, какие учит студент:",nsB:"Добавить студента и перейти к оценкам",nsEg:"Выберите группу",nsEs:"Отметьте хотя бы один предмет"},tj:{day:"Баҳоҳои рӯз",date:"Сана",rb:"Рубеж",sum:"Натиҷаҳо",stn:"Донишҷӯён",avg:"Натиҷаи миёна",newS:"Номи фан",delday:"Рӯзро нест кунед",other:"＋ Фани дигар…",del:"Донишҷӯро нест кунед?",ph:"Алӣ Раҳимов\nВалӣ Содиқов",nod:"Барои ин рӯз баҳо нест",pr:"Варақаи баҳо",sign:"Омӯзгор",abs:"Ғоиб буд",bk:"Нусхаи захира",ld:"Боргирии нусха",ok:"Нусха бор шуд",bad:"Файлро хондан нашуд",conf:"Маълумоти ҷорӣ бо нусха иваз шавад?",pa:"Ғоибӣ",att:"Н — ғоибӣ",risk:"Хавф",all:"Ба ҳама (холӣ)",xl:"Аз Excel/CSV",card:"Корти донишҷӯ",avs:"Натиҷаи миёна аз рӯи фанҳо",pw:"Парол",pw1:"Паролро ворид кунед",pw2:"Пароли нав (холӣ — нест кардан)",pwbad:"Пароли нодуруст",sd:"Тақсимоти баҳоҳо",dy:"Баҳои миёна аз рӯи рӯзҳо",stT:"Донишҷӯён",nmL:"Ному насаб",lgL:"Логин",psL:"Рамз",addB:"Илова",kcT:"Логин ва рамзи донишҷӯ",kcS:"Нигоҳ доштан",more:"Иловагӣ",eName:"Ному насаби донишҷӯро нависед",eDup:"Чунин донишҷӯ дар рӯйхат аллакай ҳаст",eLg:"Логин: танҳо ҳарфҳои лотинӣ ва рақамҳо, аз 3 то 20 аломат",eLgT:"Ин логинро донишҷӯи дигар дорад",ePw:"Рамз: на кӯтоҳтар аз 6 аломат (баҳоҳо бо ин рамз рамзгузорӣ мешаванд)",eBoth:"Ҳам логин, ҳам рамзро нависед (ё ҳардуро холӣ гузоред — худкор сохта мешаванд)",hintC:"Логин ва рамзро навиштан шарт нест — худкор сохта мешаванд; баъд онҳоро бо тугмаи 🔑 дар сатри донишҷӯ тағйир додан мумкин аст.",nsT:"Донишҷӯи нав (гурӯҳ, фанҳо, логин)",nsP:"Гурӯҳро интихоб кунед — фанҳои он аз рӯи ҷадвал пайдо мешаванд.",nsNo:"Дар ҷадвали ин гурӯҳ фан нест. Дар журнал фанро интихоб кунед ва донишҷӯро дар он ҷо илова намоед.",nsS:"Фанҳои гурӯҳ (аз рӯи ҷадвал) — қайд кунед, ки донишҷӯ кадомашро меомӯзад:",nsB:"Донишҷӯро илова кунед ва ба баҳоҳо гузаред",nsEg:"Гурӯҳро интихоб кунед",nsEs:"Ақаллан як фанро қайд кунед"}};
+var JX={ru:{day:"Оценки за день",date:"Дата",rb:"Рубеж",sum:"Итоги",stn:"Студентов",avg:"Средний итог",newS:"Название предмета",delday:"Удалить день",other:"＋ Другой предмет…",del:"Удалить студента?",ph:"Али Рахимов\nВали Садыков",nod:"Пока нет оценок за этот день",pr:"Ведомость",sign:"Преподаватель",abs:"Отсутствовал",bk:"Сохранить копию",ld:"Загрузить копию",ok:"Копия загружена",bad:"Не удалось прочитать файл",conf:"Заменить текущие данные журнала данными из копии?",pa:"Пропуски",att:"Н — пропуск",risk:"Риск",all:"Всем (пустым)",xl:"Из Excel/CSV",card:"Карточка студента",avs:"Средний итог по предметам",pw:"Пароль",pw1:"Введите пароль",pw2:"Новый пароль (пусто — убрать)",pwbad:"Неверный пароль",sd:"Распределение оценок",dy:"Средний балл по дням",stT:"Студенты",nmL:"ФИО",lgL:"Логин",psL:"Пароль",addB:"Добавить",kcT:"Логин и пароль студента",kcS:"Сохранить",more:"Дополнительно",eName:"Введите ФИО студента",eDup:"Такой студент уже есть в этом списке",eLg:"Логин: только латинские буквы и цифры, от 3 до 20 знаков",eLgT:"Такой логин уже занят другим студентом",ePw:"Пароль: не короче 8 знаков (баллы шифруются этим паролем). Не используйте дату рождения или 12345678.",eBoth:"Введите и логин, и пароль (или оставьте оба пустыми — они создадутся сами)",hintC:"Логин и пароль можно не вводить — они создадутся сами; потом их можно изменить кнопкой 🔑 в строке студента.",nsT:"Новый студент (группа, предметы, логин)",nsP:"Выберите группу — появятся её предметы по расписанию.",nsNo:"В расписании этой группы предметов нет. Выберите предмет в журнале ниже и добавьте студента там.",nsS:"Предметы группы (по расписанию) — отметьте, какие учит студент:",nsB:"Добавить студента и перейти к оценкам",nsEg:"Выберите группу",nsEs:"Отметьте хотя бы один предмет"},tj:{day:"Баҳоҳои рӯз",date:"Сана",rb:"Рубеж",sum:"Натиҷаҳо",stn:"Донишҷӯён",avg:"Натиҷаи миёна",newS:"Номи фан",delday:"Рӯзро нест кунед",other:"＋ Фани дигар…",del:"Донишҷӯро нест кунед?",ph:"Алӣ Раҳимов\nВалӣ Содиқов",nod:"Барои ин рӯз баҳо нест",pr:"Варақаи баҳо",sign:"Омӯзгор",abs:"Ғоиб буд",bk:"Нусхаи захира",ld:"Боргирии нусха",ok:"Нусха бор шуд",bad:"Файлро хондан нашуд",conf:"Маълумоти ҷорӣ бо нусха иваз шавад?",pa:"Ғоибӣ",att:"Н — ғоибӣ",risk:"Хавф",all:"Ба ҳама (холӣ)",xl:"Аз Excel/CSV",card:"Корти донишҷӯ",avs:"Натиҷаи миёна аз рӯи фанҳо",pw:"Парол",pw1:"Паролро ворид кунед",pw2:"Пароли нав (холӣ — нест кардан)",pwbad:"Пароли нодуруст",sd:"Тақсимоти баҳоҳо",dy:"Баҳои миёна аз рӯи рӯзҳо",stT:"Донишҷӯён",nmL:"Ному насаб",lgL:"Логин",psL:"Рамз",addB:"Илова",kcT:"Логин ва рамзи донишҷӯ",kcS:"Нигоҳ доштан",more:"Иловагӣ",eName:"Ному насаби донишҷӯро нависед",eDup:"Чунин донишҷӯ дар рӯйхат аллакай ҳаст",eLg:"Логин: танҳо ҳарфҳои лотинӣ ва рақамҳо, аз 3 то 20 аломат",eLgT:"Ин логинро донишҷӯи дигар дорад",ePw:"Рамз: на кӯтоҳтар аз 8 аломат (баҳоҳо бо ин рамз рамзгузорӣ мешаванд). Санаи таваллуд ё 12345678-ро истифода набаред.",eBoth:"Ҳам логин, ҳам рамзро нависед (ё ҳардуро холӣ гузоред — худкор сохта мешаванд)",hintC:"Логин ва рамзро навиштан шарт нест — худкор сохта мешаванд; баъд онҳоро бо тугмаи 🔑 дар сатри донишҷӯ тағйир додан мумкин аст.",nsT:"Донишҷӯи нав (гурӯҳ, фанҳо, логин)",nsP:"Гурӯҳро интихоб кунед — фанҳои он аз рӯи ҷадвал пайдо мешаванд.",nsNo:"Дар ҷадвали ин гурӯҳ фан нест. Дар журнал фанро интихоб кунед ва донишҷӯро дар он ҷо илова намоед.",nsS:"Фанҳои гурӯҳ (аз рӯи ҷадвал) — қайд кунед, ки донишҷӯ кадомашро меомӯзад:",nsB:"Донишҷӯро илова кунед ва ба баҳоҳо гузаред",nsEg:"Гурӯҳро интихоб кунед",nsEs:"Ақаллан як фанро қайд кунед"}};
 function today(){var d=new Date();return d.getFullYear()+"-"+("0"+(d.getMonth()+1)).slice(-2)+"-"+("0"+d.getDate()).slice(-2);}
 var JDT=today(),JRB=1;
 function jsubs(g){var o={};SC.lessons.forEach(function(x){if(x.g.indexOf(g)>-1)o[jsn(x.n)]=1;});JC.forEach(function(x){o[x]=1;});Object.keys(JD).forEach(function(k){if(k.indexOf(g+"|")===0&&(JD[k].st||[]).length)o[k.slice(g.length+1)]=1;});return Object.keys(o).sort();}
@@ -502,13 +503,10 @@ function mkIn(acc,fn){var i=document.createElement("input");i.type="file";i.acce
 var fi=mkIn("image/*",function(f){var r=new FileReader();r.onload=function(){var im=new Image();im.onload=function(){var s=Math.min(im.width,im.height),c=document.createElement("canvas");c.width=c.height=240;c.getContext("2d").drawImage(im,(im.width-s)/2,(im.height-s)/2,s,s,0,0,240,240);PHO[tgt]=c.toDataURL("image/jpeg",.82);if(!sv("phot",PHO))say("Память браузера заполнена");render();};im.src=r.result;};r.readAsDataURL(f);});
 var ji=mkIn("application/json,.json",function(f){var r=new FileReader();r.onload=function(){try{var o=JSON.parse(r.result);for(var k in o)PHO[k]=o[k];sv("phot",PHO);render();}catch(e){say("Ошибка файла");}};r.readAsText(f);});
 /* ---- новости ---- */
-var NB=[{d:"2026-11-23",ru:["Обновлён сайт факультета","Добавлены поиск сотрудников, раздел «Сегодня», новости и информация для абитуриентов."],tj:["Сомонаи факулта навсозӣ шуд","Ҷустуҷӯи кормандон, бахши «Имрӯз», хабарҳо ва маълумот барои довталабон илова шуд."]}];
+var NB=[{d:"2026-11-28",ru:["Новые возможности сайта","Расписание группы можно добавить в календарь телефона, меню стало удобнее на смартфоне, а абитуриенты могут узнать, как поступить и кем работать после выпуска."],tj:["Имкониятҳои нави сомона","Ҷадвали дарсҳои гурӯҳро ба тақвими телефон илова кардан мумкин аст, меню дар смартфон қулайтар шуд, довталабон метавонанд бифаҳманд, ки чӣ тавр дохил шаванд ва пас аз хатм дар куҷо кор кунанд."]},{d:"2026-11-23",ru:["Обновлён сайт факультета","Добавлены поиск сотрудников, раздел «Сегодня», новости и информация для абитуриентов."],tj:["Сомонаи факулта навсозӣ шуд","Ҷустуҷӯи кормандон, бахши «Имрӯз», хабарҳо ва маълумот барои довталабон илова шуд."]}];
 function news(){var u=ld("news",[]).map(function(i){return {d:i.d,h:i.h,x:i.x,id:i.id,u:1};}),b=NB.map(function(i,k){return {d:i.d,h:i[L][0],x:i[L][1],id:"b"+k};});return u.concat(b).sort(function(a,b){return a.d<b.d?1:a.d>b.d?-1:0;});}
 function nc(i){return '<div class="card nc"><span class="tag">'+ea(i.d).split("-").reverse().join(".")+'</span><h3 style="margin-top:8px">'+ea(i.h)+'</h3>'+(i.x?'<p>'+ea(i.x)+'</p>':"")+(PE&&i.u?'<button class="del" data-a="x-del" data-id="'+i.id+'">✕</button>':"")+'</div>';}
-function ticker(){var el=document.getElementById("tick");if(!el)return;var it=news();if(!it.length){el.hidden=true;el.innerHTML="";return;}
-var one=it.map(function(i){return '<a href="#news"><b>'+ea(i.d).split("-").reverse().slice(0,2).join(".")+'</b>'+ea(i.h)+(i.x?' — '+ea(i.x):'')+'</a>';}).join(""),len=it.reduce(function(s,i){return s+i.h.length+(i.x||"").length;},0);
-var html='<span class="tk-l">📢 '+N("news")+'</span><div class="tk-w"><div class="tk-t" style="animation-duration:'+Math.max(18,Math.round(len*0.22))+'s">'+one+'<span aria-hidden="true" style="display:inline-flex">'+one.replace(/<a /g,'<a tabindex="-1" ')+'</span></div></div>';
-if(el.dataset.h!==html){el.innerHTML=html;el.dataset.h=html;}el.hidden=false;}
+function newsBlock(n){return '<h2>'+N("nwT")+'</h2><div class="grid">'+news().slice(0,n).map(nc).join("")+'</div><a class="back" href="#news">'+N("all")+'</a>';}
 function newsV(){return '<main class="v"><h2>'+N("nwT")+'</h2><p class="sub">'+N("nwSub")+'</p><div class="grid">'+(news().map(nc).join("")||'<p>'+N("nothing")+'</p>')+'</div></main>';}
 /* ---- абитуриентам ---- */
 function applyV(){var c={};SC.groups.forEach(function(g){c[g.spec]=(c[g.spec]||0)+1;});
@@ -521,7 +519,7 @@ h+='<div class="card">'+(ls.length?ls.map(function(x){return '<div class="ls"><s
 var s2=sl.c>=0?sl.c:sl.n;
 if(d>=0&&s2>=0){var b={};SC.lessons.forEach(function(x){if(x.d===d&&x.s===s2)roomsOf(x).forEach(function(r){b[r]=1;});});var fr=allRooms().filter(function(r){return !b[r];});
 h+='<div class="card" style="margin-top:14px"><h3>✅ '+N("freeNow")+' · '+SC.slots[s2].replace("-","–")+' ('+fr.length+')</h3><div class="chips">'+fr.map(function(r){return '<span>'+r+'</span>';}).join("")+'</div></div>';}
-return h+'<p><button class="btn2" data-a="x-inst">'+N("inst")+'</button></p><p id="ih" class="sub"></p></main>';}
+return h+'<p><button class="btn2" data-a="x-inst">'+N("inst")+'</button></p><p id="ih" class="sub"></p>'+newsBlock(2)+'</main>';}
 /* ---- поиск ---- */
 function norm(s){return String(s).toLowerCase().replace(/ӣ/g,"и").replace(/ӯ/g,"у").replace(/ҷ/g,"ч").replace(/қ/g,"к").replace(/ғ/g,"г").replace(/ҳ/g,"х").replace(/ё/g,"е");}
 function people(){var t=T[L],o=[];D.forEach(function(x,i){[x.h].concat(x.p).forEach(function(p,k){o.push({n:p[0],i:p[1],d:t.d[i][0],h:k===0});});});if(!o.some(function(p){return p.n===DEAN[0];}))o.unshift({n:DEAN[0],i:0,d:t.dRole,dn:1});return o;}
@@ -551,9 +549,9 @@ else if(a==="x-inst"){if(DP){DP.prompt();}else{var ih=document.getElementById("i
 /* ---- встраивание в приложение ---- */
 var _nav=nav;nav=function(r){_nav(r);var n=document.getElementById("nav");function mk(h,l){return '<a href="#'+h+'" class="'+(r===h?"on":"")+'">'+l+'</a>';}
 n.querySelector("a").insertAdjacentHTML("afterend",mk("today",N("today"))+mk("search",N("search")));
-n.querySelector('a[href="#dean"]').insertAdjacentHTML("afterend",mk("news",N("news"))+mk("apply",N("apply")));ticker();};
+n.querySelector('a[href="#dean"]').insertAdjacentHTML("afterend",mk("news",N("news"))+mk("apply",N("apply")));};
 var _v=view;view=function(r){if(r==="today")return todayV();if(r==="search")return searchV();if(r==="news")return newsV();if(r==="apply")return applyV();
-return _v(r);};
+var h=_v(r);if(/^(home)?$/.test(r))h=h.replace(/<\/main>\s*$/,function(){return newsBlock(3)+'</main>';});return h;};
 var _r=render;render=function(){_r();var r=(location.hash||"#home").slice(1);if(r==="today"){document.getElementById("mg").onchange=function(){sv("mygrp",this.value);render();};}if(r==="search")bS();tools(r);};
 /* ---- PWA ---- */
 window.addEventListener("beforeinstallprompt",function(e){e.preventDefault();DP=e;});
@@ -653,7 +651,7 @@ set:function(name,l,p){var x=JX[L],k=nk(name),cr=lc("creds",{}),cur=cr[k];l=Stri
 if(!l&&!p)return "";
 if(cur){if(!l)l=cur.l;if(!p)p=cur.p;}else if(!l||!p)return x.eBoth;
 if(!/^[a-z0-9]{3,20}$/.test(l))return x.eLg;
-if(p.length<6)return x.ePw;
+if(p.length<8&&!(cur&&cur.p===p))return x.ePw;
 if(Object.keys(cr).some(function(q){return q!==k&&cr[q].l===l;}))return x.eLgT;
 cr[k]={l:l,p:p};sc2("creds",cr);schedule(2000);return "";},
 edit:function(name){var x=JX[L],r=ensureCr(collect()),c=r.cr[nk(name)];if(!c)return;
@@ -664,13 +662,15 @@ m.onclick=function(e){var q=e.target.dataset?e.target.dataset.x:undefined;if(q==
 m.onkeydown=function(e){if(e.key==="Enter"){e.preventDefault();go();}else if(e.key==="Escape")m.remove();};
 document.body.appendChild(m);m.querySelector("#kcl").focus();}};
 /* ---- уведомления родителям (Telegram) ---- */
-var TG={ru:{btn:"Родители",ttl:"🔔 Уведомления родителям",nw:"Новая оценка",abs:"Пропуск",ok:"✅ Вы подключены. Вы будете получать оценки: {n}.",bad0:"Ссылка недействительна. Попросите новую у преподавателя.",s1:"1. В Telegram откройте @BotFather → /newbot → придумайте название бота.",s2:"2. Вставьте токен, который он пришлёт:",on:"Включить",bad:"Токен не подошёл. Проверьте и попробуйте ещё раз.",bot:"Бот",par:"родителей",cp:"Ссылка",cpd:"Скопировано",all:"Скачать ссылки (CSV)",off:"Выключить",cl:"Закрыть",tgT:"Telegram",phT:"Родители студентов",hint:"Отправьте родителю его ссылку. Он нажимает «Начать» в Telegram и получает оценки своего ребёнка. Уведомления уходят через 15 секунд после ввода оценки, пока журнал открыт у вас в браузере."},
-tj:{btn:"Волидон",ttl:"🔔 Огоҳиномаҳо ба волидон",nw:"Баҳои нав",abs:"Ғоиб",ok:"✅ Шумо пайваст шудед. Шумо баҳоҳоро мегиред: {n}.",bad0:"Истинод дуруст нест. Аз муаллим истиноди навро талаб кунед.",s1:"1. Дар Telegram ба @BotFather равед → /newbot → номи бот гузоред.",s2:"2. Токенеро, ки фиристод, дарҷ кунед:",on:"Фаъол кардан",bad:"Токен мувофиқ нест. Санҷед ва аз нав кӯшиш кунед.",bot:"Бот",par:"волидон",cp:"Истинод",cpd:"Нусха шуд",all:"Зеркашии истинодҳо (CSV)",off:"Хомӯш кардан",cl:"Пӯшидан",tgT:"Telegram",phT:"Волидони донишҷӯён",hint:"Истинодро ба волид фиристед. Ӯ дар Telegram «Start»-ро пахш мекунад ва баҳоҳои фарзандашро мегирад. Огоҳиномаҳо 15 сония пас аз ворид кардани баҳо мераванд, то даме ки журнал дар браузери шумо кушода аст."}};
+var TG={ru:{btn:"Родители",ttl:"🔔 Уведомления родителям",nw:"Новая оценка",abs:"Пропуск",ok:"✅ Вы подключены. Вы будете получать оценки: {n}.",bad0:"Ссылка недействительна. Попросите новую у преподавателя.",s1:"1. В Telegram откройте @BotFather → /newbot → придумайте название бота.",s2:"2. Вставьте токен, который он пришлёт:",on:"Включить",bad:"Токен не подошёл. Проверьте и попробуйте ещё раз.",bot:"Бот",par:"родителей",cp:"Ссылка",cpd:"Скопировано",all:"Скачать ссылки (CSV)",off:"Выключить",cl:"Закрыть",smsT:"SMS родителям",sms1:"1. Установите на Android-телефон приложение httpSMS (httpsms.com) и войдите в него.",sms2:"2. В Settings скопируйте API-ключ и вставьте сюда вместе с номером этого телефона (+992…).",key:"API-ключ httpSMS",from:"Номер вашего телефона",smsOn:"Включить SMS",smsOk:"SMS включены · с номера",smsOff:"Выключить SMS",smsBad:"Заполните API-ключ и номер телефона.",ph:"Телефон родителя",tgT:"Telegram (необязательно)",phT:"Родители студентов",phHint:"Номер родителя вводится напротив студента и сохраняется сам. Номер без кода страны считается таджикским (+992). SMS уходят через 15 секунд после ввода оценки, пока журнал открыт, и с вашего телефона с включённым интернетом.",hint:"Отправьте родителю его ссылку. Он нажимает «Начать» в Telegram и получает оценки своего ребёнка. Уведомления уходят через 15 секунд после ввода оценки, пока журнал открыт у вас в браузере."},
+tj:{btn:"Волидон",ttl:"🔔 Огоҳиномаҳо ба волидон",nw:"Баҳои нав",abs:"Ғоиб",ok:"✅ Шумо пайваст шудед. Шумо баҳоҳоро мегиред: {n}.",bad0:"Истинод дуруст нест. Аз муаллим истиноди навро талаб кунед.",s1:"1. Дар Telegram ба @BotFather равед → /newbot → номи бот гузоред.",s2:"2. Токенеро, ки фиристод, дарҷ кунед:",on:"Фаъол кардан",bad:"Токен мувофиқ нест. Санҷед ва аз нав кӯшиш кунед.",bot:"Бот",par:"волидон",cp:"Истинод",cpd:"Нусха шуд",all:"Зеркашии истинодҳо (CSV)",off:"Хомӯш кардан",cl:"Пӯшидан",smsT:"SMS ба волидон",sms1:"1. Дар телефони Android барномаи httpSMS (httpsms.com)-ро насб кунед ва ворид шавед.",sms2:"2. Дар Settings калиди API-ро нусха кунед ва бо рақами ҳамин телефон (+992…) дарҷ намоед.",key:"Калиди API-и httpSMS",from:"Рақами телефони шумо",smsOn:"Фаъол кардани SMS",smsOk:"SMS фаъол аст · аз рақами",smsOff:"Хомӯш кардани SMS",smsBad:"Калиди API ва рақами телефонро пур кунед.",ph:"Телефони волид",tgT:"Telegram (ихтиёрӣ)",phT:"Волидони донишҷӯён",phHint:"Рақами волид дар муқобили донишҷӯ навишта мешавад ва худ захира мешавад. Рақами бе рамзи кишвар тоҷикӣ (+992) ҳисоб мешавад. SMS 15 сония пас аз ворид кардани баҳо мераванд, то даме ки журнал кушода аст.",hint:"Истинодро ба волид фиристед. Ӯ дар Telegram «Start»-ро пахш мекунад ва баҳоҳои фарзандашро мегирад. Огоҳиномаҳо 15 сония пас аз ворид кардани баҳо мераванд, то даме ки журнал дар браузери шумо кушода аст."}};
 function TGt(){return TG[L]||TG.ru;}
 var TB={t:0,busy:false,poll:false};
 function tgCfg(){return lc("tg",null);}
-try{localStorage.removeItem("sms");}catch(e){}
-function nfOn(){var c=tgCfg();return !!(c&&c.t&&c.on);}
+function smsCfg(){var x=lc("sms",null);return x&&x.k&&x.f&&x.on?x:null;}
+function nfOn(){var c=tgCfg();return !!((c&&c.t&&c.on)||smsCfg());}
+function smsNorm(x){var d=String(x||"").replace(/[^\d+]/g,"");if(d.indexOf("00")===0)d="+"+d.slice(2);if(d.charAt(0)!=="+"){if(d.length===9)d="+992"+d;else if(d.length>=10)d="+"+d;}return /^\+\d{9,15}$/.test(d)?d:"";}
+function smsSend(to,text){var x=smsCfg();return fetch("https://api.httpsms.com/v1/messages/send",{method:"POST",headers:{"x-api-key":x.k,"Content-Type":"application/json","Accept":"application/json"},body:JSON.stringify({content:text,from:x.f,to:to})}).then(function(r){return r.ok;}).catch(function(){return false;});}
 function tgCall(t,m,p){return fetch("https://api.telegram.org/bot"+t+"/"+m,{method:"POST",body:new URLSearchParams(p||{})}).then(function(r){return r.json();});}
 function tgCodes(m){var cs=lc("tgcodes",{}),ch=0;Object.keys(m).forEach(function(k){if(!cs[k]){cs[k]=rnd(8);ch=1;}});if(ch)sc2("tgcodes",cs);return cs;}
 function tgNow(){var o={};Object.keys(JD).forEach(function(k){var j=JD[k];if(!j||!Array.isArray(j.st))return;var dates=j.dates||[];j.st.forEach(function(q){var n=nk(String(q.n));if(!n)return;var v={d:{},r1:String(q.r1||""),r2:String(q.r2||""),ex:String(q.ex||"")};dates.forEach(function(dt,i){var x=q.d&&q.d[i];if(x!==""&&x!=null)v.d[dt]=String(x);});o[k+"~~"+n]=v;});});return o;}
@@ -693,23 +693,27 @@ dts.forEach(function(dt){var x=v.d[dt];if(x!==undefined&&x!==o.d[dt])lines.push(
 [["r1",Y("r1")],["r2",Y("r2")],["ex",Y("ex")]].forEach(function(f){if(v[f[0]]&&v[f[0]]!==o[f[0]])lines.push("• "+sb+", "+f[1]+" — "+v[f[0]]);});
 if(lines.length){per[nn]=per[nn]||{keys:[],lines:[]};per[nn].keys.push(key);per[nn].lines=per[nn].lines.concat(lines);}});
 var next=JSON.parse(JSON.stringify(now)),jobs=[];
-Object.keys(per).forEach(function(nn){var cd=cs[nn],ids=(c&&c.t&&c.on&&cd&&par[cd])||[];if(!m[nn]||!ids.length)return;var txt=t.nw+" · "+m[nn].n+"\n"+per[nn].lines.join("\n"),js=ids.map(function(id){return tgCall(c.t,"sendMessage",{chat_id:id,text:txt}).then(function(r){return !!(r&&(r.ok||r.error_code===403));}).catch(function(){return false;});});
+Object.keys(per).forEach(function(nn){var cd=cs[nn],ids=(c&&c.t&&c.on&&cd&&par[cd])||[],pn=smsCfg()?smsNorm(lc("phones",{})[nn]):"";if(!m[nn]||(!ids.length&&!pn))return;var txt=t.nw+" · "+m[nn].n+"\n"+per[nn].lines.join("\n"),js=ids.map(function(id){return tgCall(c.t,"sendMessage",{chat_id:id,text:txt}).then(function(r){return !!(r&&(r.ok||r.error_code===403));}).catch(function(){return false;});});
+if(pn)js.push(smsSend(pn,txt));
 jobs.push(Promise.all(js).then(function(rs){if(rs.some(function(x){return !x;}))per[nn].keys.forEach(function(key){if(snap[key])next[key]=snap[key];else delete next[key];});}));});
 return Promise.all(jobs).then(function(){sc2("tgsnap",next);});
 }).catch(function(){}).then(function(){TB.busy=false;});}
 function tgSchedule(ms){if(!nfOn())return;clearTimeout(TB.t);TB.t=setTimeout(function(){TB.t=0;tgCheck();},ms||15000);}
 function tgOpen(){var t=TGt(),m=document.createElement("div"),st="width:100%;padding:11px 12px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--text);font:inherit;font-size:16px;margin:4px 0 10px",hh='<h4 style="margin:14px 0 4px">',er0='style="color:#b91c1c;margin:0 0 10px"';m.className="mdl";
-function draw(){var c=tgCfg(),tg=c&&c.t,h='<div class="card" role="dialog" aria-modal="true" style="max-height:90vh;overflow:auto"><h3 style="margin:0 0 6px">'+t.ttl+'</h3>';
+function draw(){var c=tgCfg(),sm=lc("sms",null),tg=c&&c.t,h='<div class="card" role="dialog" aria-modal="true" style="max-height:90vh;overflow:auto"><h3 style="margin:0 0 6px">'+t.ttl+'</h3>';
+h+=hh+'📱 '+t.smsT+'</h4>';
+if(sm&&sm.k)h+='<p class="sub">✅ '+t.smsOk+' '+ea(sm.f)+'</p><div class="row" style="justify-content:flex-end"><button class="btn2" data-x="5" style="background:var(--muted)">'+t.smsOff+'</button></div>';
+else h+='<p class="sub">'+t.sms1+'</p><p class="sub">'+t.sms2+'</p><input id="smk" autocomplete="off" spellcheck="false" placeholder="'+t.key+'" style="'+st+'"><input id="smf" type="tel" autocomplete="off" placeholder="'+t.from+' (+992…)" style="'+st+'"><p class="sub" id="sme" '+er0+'></p><div class="row" style="justify-content:flex-end"><button class="btn2" data-x="4">'+t.smsOn+'</button></div>';
 h+=hh+'✈ '+t.tgT+'</h4>';
 if(tg)h+='<p class="sub">✅ '+t.bot+': @'+ea(c.u||"")+'</p><div class="row" style="justify-content:flex-end"><button class="btn2" data-x="3" style="background:var(--muted)">'+t.off+'</button></div>';
 else h+='<p class="sub">'+t.s1+'</p><p class="sub">'+t.s2+'</p><input id="tgt" autocomplete="off" spellcheck="false" style="'+st+'"><p class="sub" id="tge" '+er0+'></p><div class="row" style="justify-content:flex-end"><button class="btn2" data-x="1">'+t.on+'</button></div>';
-var mm=collect(),cs=tgCodes(mm),par=lc("tgpar",{}),ks=Object.keys(mm).sort();
-if(tg)h+=hh+'👨‍👩‍👦 '+t.phT+'</h4><p class="sub" style="font-size:13px;margin:0 0 8px">'+t.hint+'</p><div style="margin-bottom:12px">'+
-ks.map(function(k){return '<div class="row" style="gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)"><div style="flex:1;min-width:140px">'+ea(mm[k].n)+' <small class="sub">· '+ea(mm[k].g)+'</small></div><span class="sub" data-n="'+cs[k]+'">'+(par[cs[k]]||[]).length+' '+t.par+'</span><button class="btn2" data-c="'+cs[k]+'" style="padding:6px 12px">'+t.cp+'</button></div>';}).join("")+'</div>';
-h+='<div class="row" style="gap:8px;justify-content:flex-end;flex-wrap:wrap">'+(tg?'<button class="btn2" data-x="2" style="background:#b45309">'+t.all+'</button>':'')+'<button class="btn2" data-x="0">'+t.cl+'</button></div></div>';
+var mm=collect(),cs=tgCodes(mm),par=lc("tgpar",{}),pho=lc("phones",{}),ks=Object.keys(mm).sort();
+h+=hh+'👨‍👩‍👦 '+t.phT+'</h4><p class="sub" style="font-size:13px;margin:0 0 8px">'+t.phHint+(tg?' '+t.hint:'')+'</p><div style="margin-bottom:12px">'+
+ks.map(function(k){var v=pho[k]||"";return '<div style="padding:8px 0;border-bottom:1px solid var(--line)"><div>'+ea(mm[k].n)+' <small class="sub">· '+ea(mm[k].g)+'</small></div><div class="row" style="gap:8px;align-items:center;margin-top:4px"><input type="tel" data-p="'+ea(k)+'" value="'+ea(v)+'" placeholder="'+t.ph+'" autocomplete="off" style="'+st+';margin:0;flex:1;min-width:140px"><span>'+(v?(smsNorm(v)?"✓":"⚠"):"")+'</span>'+(tg?'<span class="sub" data-n="'+cs[k]+'">'+(par[cs[k]]||[]).length+' '+t.par+'</span><button class="btn2" data-c="'+cs[k]+'" style="padding:6px 12px">'+t.cp+'</button>':'')+'</div></div>';}).join("")+'</div><div class="row" style="gap:8px;justify-content:flex-end;flex-wrap:wrap">'+(tg?'<button class="btn2" data-x="2" style="background:#b45309">'+t.all+'</button>':'')+'<button class="btn2" data-x="0">'+t.cl+'</button></div></div>';
 m.innerHTML=h;}
 function upd(){var par=lc("tgpar",{});[].forEach.call(m.querySelectorAll("[data-n]"),function(e){e.textContent=((par[e.dataset.n]||[]).length)+" "+t.par;});}
 function link(cd){return "https://t.me/"+tgCfg().u+"?start="+cd;}
+m.oninput=function(e){var d=e.target.dataset||{};if(d.p!==undefined){var ph=lc("phones",{}),v=e.target.value.trim();ph[d.p]=v;sc2("phones",ph);var sp=e.target.nextElementSibling;if(sp)sp.textContent=v?(smsNorm(v)?"✓":"⚠"):"";}};
 m.onclick=function(e){var d=e.target.dataset||{};
 if(d.c){var u=link(d.c),b=e.target;(navigator.clipboard?navigator.clipboard.writeText(u):Promise.reject()).then(function(){b.textContent=t.cpd;}).catch(function(){window.prompt(t.cp,u);});return;}
 if(d.x==="0"||e.target===m){m.remove();return;}
@@ -717,7 +721,9 @@ if(d.x==="1"){var v=(m.querySelector("#tgt").value||"").trim(),er=m.querySelecto
 tgCall(v,"getMe").then(function(r){if(!r||!r.ok)throw 0;return tgCall(v,"deleteWebhook").catch(function(){}).then(function(){sc2("tg",{t:v,u:r.result.username,on:1});if(!lc("tgsnap",null))sc2("tgsnap",tgNow());draw();tgPoll().then(upd);});}).catch(function(){er.textContent=t.bad;});return;}
 if(d.x==="2"){var mm=collect(),cs=tgCodes(mm),rows=[["Группа","ФИО","Ссылка"]].concat(Object.keys(mm).sort().map(function(k){return [mm[k].g,mm[k].n,link(cs[k])];}));
 dl(new Blob(["\ufeff"+rows.map(function(x){return x.map(function(q){return '"'+String(q).replace(/"/g,'""')+'"';}).join(";");}).join("\n")],{type:"text/csv"}),"parents.csv");return;}
-if(d.x==="3"){sc2("tg",null);sc2("tgsnap",null);draw();}};
+if(d.x==="3"){sc2("tg",null);if(!smsCfg())sc2("tgsnap",null);draw();return;}
+if(d.x==="4"){var k=(m.querySelector("#smk").value||"").trim(),f=smsNorm(m.querySelector("#smf").value),e2=m.querySelector("#sme");if(!k||!f){e2.textContent=t.smsBad;return;}sc2("sms",{k:k,f:f,on:1});if(!lc("tgsnap",null))sc2("tgsnap",tgNow());draw();return;}
+if(d.x==="5"){sc2("sms",null);var c2=tgCfg();if(!(c2&&c2.t&&c2.on))sc2("tgsnap",null);draw();}};
 draw();document.body.appendChild(m);if(tgCfg())tgPoll().then(upd);}
 
 /* ---- встраивание ---- */
@@ -731,6 +737,75 @@ window.addEventListener("pagehide",function(){if(lc("pubdirty",0)&&!PB.busy)auto
 if(lc("pubdirty",0)&&ghCfg()&&ghCfg().t)setTimeout(function(){autoPub(false);},1500);
 document.addEventListener("visibilitychange",function(){if(document.visibilityState==="hidden"&&TB.t){clearTimeout(TB.t);TB.t=0;tgCheck();}});
 if(nfOn()){setTimeout(tgCheck,4000);setInterval(function(){if(document.visibilityState==="visible")tgPoll();},45000);}
+})();
+</script>
+<style>
+#mnb{display:none;font-size:20px;line-height:1}
+.card ol{margin:6px 0 0;padding-left:22px;color:var(--text)}.card ol li{margin:4px 0}
+#foot a{color:var(--accent);text-decoration:none}#foot a:hover{text-decoration:underline}
+@media (max-width:760px){
+#nav{flex-wrap:wrap;overflow:visible;row-gap:6px}
+#nav>b{order:0}#nav>button{order:1}#mnb{display:inline-block}
+#nav>a{display:none;order:5;flex:1 1 calc(50% - 4px);text-align:center;border:1px solid var(--line);background:var(--card)}
+#nav.open{max-height:calc(100vh - 10px);overflow-y:auto}
+#nav.open>a{display:block}
+#nav>a.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+}
+</style>
+<script>
+(function(){
+var K0={ru:{menu:"Меню",tch:"👩‍🏫 Для преподавателей",tchOff:"Скрыть инструменты преподавателя",map:"📍 Открыть на карте",ics:"📅 В календарь телефона",icsQ:"До какой даты повторять занятия в календаре? (ГГГГ-ММ-ДД)",icsBad:"Дата указана неверно. Пример: 2026-12-31",icsNone:"Нет занятий для экспорта",icsOk:"Файл календаря скачан. Откройте его на телефоне — занятия добавятся в календарь.",
+how:"Как поступить",steps:["Зарегистрируйтесь на вступительные экзамены в Национальном центре тестирования при Президенте Республики Таджикистан.","При регистрации выберите ХГУ имени академика Б. Гафурова и нужную специальность факультета математики.","Сдайте централизованные вступительные тесты.","После объявления результатов зачисления принесите документы в приёмную комиссию ХГУ."],howNote:"Точные сроки и правила приёма публикуют Национальный центр тестирования и приёмная комиссия ХГУ.",
+job:"Кем работать после выпуска",jobs:{"Математика":["Математика","Учитель математики в школе, лицее или колледже; преподаватель вуза; аналитик данных; научный сотрудник."],"Информатика":["Информатика","Программист, веб-разработчик, учитель информатики, системный администратор, тестировщик ПО."],"Математикаи амалӣ":["Прикладная математика","Аналитик в банке или компании, специалист по моделированию и статистике, программист, преподаватель."],"Мат. физика":["Математическая физика","Учитель математики и физики, инженер-исследователь, специалист по расчётам и моделированию."]}},
+tj:{menu:"Меню",tch:"👩‍🏫 Барои омӯзгорон",tchOff:"Пинҳон кардани абзорҳои омӯзгор",map:"📍 Дар харита кушодан",ics:"📅 Ба тақвими телефон",icsQ:"Дарсҳо дар тақвим то кадом сана такрор шаванд? (СССС-ММ-РР)",icsBad:"Сана нодуруст аст. Мисол: 2026-12-31",icsNone:"Дарс барои содирот нест",icsOk:"Файли тақвим боргирӣ шуд. Онро дар телефон кушоед — дарсҳо ба тақвим илова мешаванд.",
+how:"Чӣ тавр дохил шудан мумкин",steps:["Дар Маркази миллии тестии назди Президенти Ҷумҳурии Тоҷикистон барои имтиҳонҳои дохилшавӣ сабти ном шавед.","Ҳангоми сабти ном ДДХ ба номи академик Б. Ғафуров ва ихтисоси лозимии факултаи математикаро интихоб кунед.","Тестҳои мутамаркази дохилшавиро супоред.","Пас аз эълони натиҷаҳои қабул ҳуҷҷатҳоро ба комиссияи қабули ДДХ биёред."],howNote:"Мӯҳлат ва қоидаҳои дақиқи қабулро Маркази миллии тестӣ ва комиссияи қабули ДДХ нашр мекунанд.",
+job:"Пас аз хатм дар куҷо кор кардан мумкин",jobs:{"Математика":["Математика","Омӯзгори математика дар мактаб, литсей ё коллеҷ; омӯзгори донишгоҳ; таҳлилгари маълумот; корманди илмӣ."],"Информатика":["Информатика","Барномасоз, веб-барномасоз, омӯзгори информатика, маъмури система, санҷишгари барномаҳо."],"Математикаи амалӣ":["Математикаи амалӣ","Таҳлилгар дар бонк ё ширкат, мутахассиси моделсозӣ ва омор, барномасоз, омӯзгор."],"Мат. физика":["Физикаи математикӣ","Омӯзгори математика ва физика, муҳандис-тадқиқотчӣ, мутахассиси ҳисобу моделсозӣ."]}}};
+function K(k){return (K0[L]||K0.ru)[k];}
+function gl(k){try{return localStorage.getItem(k);}catch(e){return null;}}
+function sl(k,v){try{localStorage.setItem(k,v);}catch(e){}}
+/* ---- режим преподавателя: инструменты видны только тем, кто их включил ---- */
+function isT(){var v=gl("teacher");if(v==="1")return true;if(v==="0")return false;
+try{var jd=JSON.parse(gl("jr")||"{}");for(var k in jd)if(jd[k]&&(jd[k].st||[]).length)return true;var g=JSON.parse(gl("gh")||"null");if(g&&g.t)return true;}catch(e){}return false;}
+var MAP="https://www.google.com/maps/search/?api=1&query="+encodeURIComponent("Худжандский государственный университет имени Б. Гафурова, Худжанд");
+/* ---- меню ---- */
+var _nav=nav;nav=function(r){_nav(r);var n=document.getElementById("nav"),t=T[L];n.classList.remove("open");
+if(!isT()){var j=n.querySelector('a[href="#journal"]');if(j)j.remove();}
+n.insertAdjacentHTML("beforeend",'<button id="mnb" aria-label="'+K("menu")+'" aria-expanded="false">☰</button>');
+document.getElementById("mnb").onclick=function(){var o=n.classList.toggle("open");this.setAttribute("aria-expanded",o?"true":"false");this.textContent=o?"✕":"☰";};
+document.getElementById("foot").innerHTML=t.uni+'<br>'+t.addrV+' · <a href="'+MAP+'" target="_blank" rel="noopener">'+K("map")+'</a> · <a href="https://hgu.tj" target="_blank" rel="noopener">hgu.tj</a><br>© 2026 '+t.fac+' · '+(isT()?'<a href="#" data-a="x-tch-off">'+K("tchOff")+'</a>':'<a href="#teacher">'+K("tch")+'</a>');};
+/* ---- экспорт расписания в календарь (.ics) ---- */
+function p2(n){return ("0"+n).slice(-2);}
+function ymd(d){return d.getFullYear()+p2(d.getMonth()+1)+p2(d.getDate());}
+function ie(s){return String(s).replace(/\\/g,"\\\\").replace(/;/g,"\\;").replace(/,/g,"\\,").replace(/\r?\n/g,"\\n");}
+function fold(l){var o=[],s=l;while(s.length>60){o.push(s.slice(0,60));s=" "+s.slice(60);}o.push(s);return o.join("\r\n");}
+function hm(x){var a=x.split(":");return p2(+a[0])+p2(+a[1])+"00";}
+function buildIcs(c,until){var t=T[L],now=new Date();now.setHours(0,0,0,0);var u=until.replace(/-/g,""),stamp=new Date().toISOString().replace(/[-:]/g,"").replace(/\.\d+Z$/,"Z"),n=0;
+var out=["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//math-faculty//schedule//RU","CALSCALE:GREGORIAN","METHOD:PUBLISH","X-WR-CALNAME:"+ie(t.sch+" · "+c.title)];
+SC.lessons.filter(c.f).forEach(function(x,i){var d=new Date(now),wd=(d.getDay()+6)%7;d.setDate(d.getDate()+(x.d-wd+7)%7);if(ymd(d)>u)return;
+var s=SC.slots[x.s].split("-"),day=ymd(d),desc=[x.t,x.g.join(", ")].filter(Boolean).join("\n");n++;
+out.push("BEGIN:VEVENT","UID:mf-"+stamp+"-"+i+"-"+x.d+"-"+x.s+"@math-faculty","DTSTAMP:"+stamp,"DTSTART:"+day+"T"+hm(s[0]),"DTEND:"+day+"T"+hm(s[1]),"RRULE:FREQ=WEEKLY;UNTIL="+u+"T235959","SUMMARY:"+ie(x.n+(x.y?" ("+(t.ty[x.y]||x.y)+")":"")));
+if(x.r)out.push("LOCATION:"+ie(t.rm+" "+x.r));if(desc)out.push("DESCRIPTION:"+ie(desc));out.push("END:VEVENT");});
+out.push("END:VCALENDAR");return n?out.map(fold).join("\r\n")+"\r\n":"";}
+function defUntil(){var d=new Date(),y=d.getFullYear(),m=d.getMonth();return m>=7?y+"-12-31":m===0?y+"-01-31":y+"-06-15";}
+function icsExport(){var c=curSched();if(!c)return;dlg(K("icsQ"),{input:1,cancel:1},function(ok,v){if(!ok)return;v=(v||"").trim()||defUntil();
+if(!/^\d{4}-\d{2}-\d{2}$/.test(v)||isNaN(new Date(v+"T12:00:00").getTime())){say(K("icsBad"));return;}
+var txt=buildIcs(c,v);if(!txt){say(K("icsNone"));return;}dl(new Blob([txt],{type:"text/calendar;charset=utf-8"}),"raspisanie-"+fname(c.title)+".ics");});
+var i=document.getElementById("dlgi");if(i)i.value=defUntil();}
+var _sr=schedRes;schedRes=function(){_sr();var c=curSched(),row=document.querySelector("#sres .row");if(c&&row)row.insertAdjacentHTML("beforeend",'<button class="btn2" data-a="x-ics" style="background:#047857">'+K("ics")+'</button>');};
+document.addEventListener("click",function(e){var el=e.target.closest?e.target.closest("[data-a]"):null;if(!el)return;var a=el.dataset.a;
+if(a==="x-ics"){icsExport();}
+else if(a==="x-tch-off"){e.preventDefault();sl("teacher","0");if(location.hash==="#journal")location.hash="#home";else render();}});
+/* ---- страницы ---- */
+function applyExtra(){var m=document.querySelector("#app main");if(!m||!m.lastElementChild)return;var sp={},J=K("jobs");SC.groups.forEach(function(g){sp[g.spec]=1;});
+var h='<h3>'+K("how")+'</h3><div class="card"><ol>'+K("steps").map(function(s){return '<li>'+s+'</li>';}).join("")+'</ol><p style="margin-top:8px">'+K("howNote")+'</p></div><h3>'+K("job")+'</h3><div class="grid">'+Object.keys(sp).filter(function(k){return J[k];}).map(function(k){return '<div class="card"><h3>'+J[k][0]+'</h3><p>'+J[k][1]+'</p></div>';}).join("")+'</div>';
+m.lastElementChild.insertAdjacentHTML("beforebegin",h);}
+var _r=render;render=function(){var r=(location.hash||"#home").slice(1);
+if(r==="teacher"){sl("teacher","1");location.replace("#journal");return;}
+_r();
+if(!isT()){var pe=document.querySelector('#app [data-a="x-pe"]');if(pe&&pe.parentNode)pe.parentNode.remove();}
+if(r==="dean"){var cs=document.querySelectorAll("#app main > .card"),last=cs[cs.length-1];if(last)last.insertAdjacentHTML("beforeend",'<p><a href="'+MAP+'" target="_blank" rel="noopener" style="color:var(--accent)">'+K("map")+'</a></p>');}
+if(r==="apply")applyExtra();};
+render();
 })();
 </script>
 </body>
