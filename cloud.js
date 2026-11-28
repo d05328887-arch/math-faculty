@@ -62,6 +62,9 @@ ru: {
   attach: "Фото или видео", voice: "Голосовое сообщение", rec: "Запись", cancel: "Отмена", sending: "Отправка…",
   noRec: "Этот браузер не умеет записывать голос.", noMic: "Нет доступа к микрофону. Разрешите его в настройках браузера.",
   needSql3: "Чтобы сохранять специальность, запустите в Supabase файл supabase-update-3.sql.",
+  tchBtn: "Преподаватели из расписания", tchT: "Аккаунты преподавателей из расписания",
+  tchInfo: "В расписании преподавателей: %1, уже есть аккаунт: %2, новых: %3. Снимите галочку, кого создавать не нужно. ФИО потом можно дополнить в таблице «Сотрудники».",
+  tchNone: "У всех преподавателей из расписания уже есть аккаунты.", linking: "Привязываю предметы к преподавателям…",
   groups: "Группы", studsN: "Студентов", subjN: "Предметов", showGrp: "Показать студентов", addToGrpS: "Добавить", addToGrp: "Добавить в группу",
   syncBtn: "Загрузить предметы из расписания и записать на них студентов", syncBtnS: "Предметы", syncing: "Загружаю предметы из расписания…",
   syncDone: "Предметов группы: %1 (новых: %2), записей студентов на предметы: %3.", grpFromSch: "Из расписания: предметов — %. Они появятся у студентов автоматически.",
@@ -127,6 +130,9 @@ tj: {
   attach: "Акс ё видео", voice: "Паёми овозӣ", rec: "Сабт", cancel: "Бекор", sending: "Фиристода мешавад…",
   noRec: "Ин браузер овозро сабт карда наметавонад.", noMic: "Ба микрофон дастрасӣ нест. Онро дар танзимоти браузер иҷозат диҳед.",
   needSql3: "Барои захираи ихтисос дар Supabase файли supabase-update-3.sql-ро иҷро кунед.",
+  tchBtn: "Омӯзгорон аз ҷадвал", tchT: "Ҳисобҳои омӯзгорон аз ҷадвал",
+  tchInfo: "Омӯзгорон дар ҷадвал: %1, ҳисоб доранд: %2, нав: %3. Касеро, ки сохтан лозим нест, қайдро гиред. Ному насабро баъд дар ҷадвали «Кормандон» пурра кардан мумкин аст.",
+  tchNone: "Ҳамаи омӯзгорони ҷадвал аллакай ҳисоб доранд.", linking: "Фанҳо ба омӯзгорон пайваст мешаванд…",
   groups: "Гурӯҳҳо", studsN: "Донишҷӯён", subjN: "Фанҳо", showGrp: "Нишон додани донишҷӯён", addToGrpS: "Илова", addToGrp: "Илова ба гурӯҳи",
   syncBtn: "Фанҳоро аз ҷадвал гирифтан ва донишҷӯёнро ба онҳо сабт кардан", syncBtnS: "Фанҳо", syncing: "Фанҳо аз ҷадвал бор мешаванд…",
   syncDone: "Фанҳои гурӯҳ: %1 (нав: %2), сабти донишҷӯён ба фанҳо: %3.", grpFromSch: "Аз ҷадвал: фанҳо — %. Онҳо ба донишҷӯён худкор пайдо мешаванд.",
@@ -886,7 +892,7 @@ function groupSubjects(gid) {
     var k = nkey(l.n); if (!k) return;
     var o = m[k] || (m[k] = { name: String(l.n).trim(), teachers: [] });
     if (String(l.n).trim().length > o.name.length) o.name = String(l.n).trim();
-    String(l.t || "").split(/\s*[,;]\s*/).forEach(function (x) { x = x.trim(); if (x && o.teachers.indexOf(x) < 0) o.teachers.push(x); });
+    splitTeachers(l.t).forEach(function (x) { if (o.teachers.indexOf(x) < 0) o.teachers.push(x); });
   });
   var keys = Object.keys(m).sort(function (a, b) { return a.length - b.length; });
   keys.forEach(function (k) {
@@ -895,6 +901,82 @@ function groupSubjects(gid) {
     if (big) { m[k].teachers.forEach(function (x) { if (m[big].teachers.indexOf(x) < 0) m[big].teachers.push(x); }); delete m[k]; }
   });
   return Object.keys(m).map(function (k) { return m[k]; }).sort(function (a, b) { return a.name.localeCompare(b.name); });
+}
+// «Иноятов С., Маҳмудҷонова М.» и даже «Иноятов С. Маҳмудҷонова М.» → два имени
+function splitTeachers(t) {
+  var s = String(t || ""), m = s.match(/[^\s.,;]+\s+[^\s.,;]{1,2}\./g);
+  return (m && m.length ? m : s.split(/\s*[,;]\s*/)).map(function (x) { return x.replace(/\s+/g, " ").trim(); }).filter(Boolean);
+}
+function schedTeachers() {
+  var sc = SCH(), seen = {}, out = [];
+  if (!sc) return out;
+  sc.lessons.forEach(function (l) { splitTeachers(l && l.t).forEach(function (n) { var k = tkey(n); if (k && !seen[k]) { seen[k] = 1; out.push(n); } }); });
+  return out.sort(function (a, b) { return a.localeCompare(b, "ru"); });
+}
+// Аккаунты для всех преподавателей из расписания
+function teachersDlg(existing) {
+  var box = document.createElement("div"), ROWS = [], busy = false, info = "";
+  box.className = "mdl";
+  var used = {}, have = {};
+  existing.forEach(function (u) { if (u.login) used[String(u.login).toLowerCase()] = 1; if (u.role === "teacher" || u.role === "admin") { var k = tkey(u.full_name); if (k) have[k] = 1; } });
+  var names = schedTeachers(), fresh = names.filter(function (n) { return !have[tkey(n)]; });
+  ROWS = fresh.map(function (n) { return { fio: n, login: makeLogin(n, used), pw: genPw(8), st: "", on: true }; });
+  box.innerHTML = '<div class="card cl-f" style="max-width:600px;width:100%;max-height:92vh;overflow:auto" id="tad"></div>';
+  document.body.appendChild(box);
+  var c = box.querySelector("#tad");
+  function okN() { return ROWS.filter(function (r) { return r.st === "ok"; }).length; }
+  function table(done) {
+    return '<div class="jt"><table><tr>' + (done ? '' : '<th><input type="checkbox" id="tall" checked></th>') + '<th>№</th><th class="nm">' + e(t("fio")) + '</th><th>' + e(t("lg")) + '</th><th>' + e(t("pw")) + '</th><th></th></tr>' +
+      ROWS.map(function (r, i) {
+        if (done && !r.on) return "";
+        return '<tr>' + (done ? '' : '<td><input type="checkbox" data-i="' + i + '"' + (r.on ? " checked" : "") + '></td>') + '<td>' + (i + 1) + '</td><td class="nm l">' + e(r.fio) + '</td><td>' + e(r.login) + '</td><td><code>' + e(r.pw) + '</code></td><td>' +
+          (r.st === "ok" ? "✓" : r.st ? '<span class="bad">⚠ ' + e(r.st) + '</span>' : "") + '</td></tr>';
+      }).join("") + '</table></div>';
+  }
+  function draw(done) {
+    var sel = ROWS.filter(function (r) { return r.on; }).length;
+    c.innerHTML = '<h3>' + e(t("tchT")) + '</h3><p class="cl-note">' + e(t("tchInfo").replace("%1", names.length).replace("%2", names.length - fresh.length).replace("%3", fresh.length)) + '</p>' +
+      (ROWS.length ? table(done) : '<p>' + e(t("tchNone")) + '</p>') +
+      (done
+        ? '<p class="cl-msg ' + (okN() === sel ? "ok" : "bad") + '">' + e(t("made").replace("%1", okN()).replace("%2", sel)) + '</p>' + (info ? '<p class="cl-note">' + e(info) + '</p>' : '') +
+          '<div class="cl-act"><button type="button" class="cl-b pri" data-csv="1">⬇ ' + e(t("dlCsv")) + '</button><button type="button" class="cl-b" data-cpa="1">' + e(t("copyAll")) + '</button>' +
+          (okN() < sel ? '<button type="button" class="cl-b" data-go="1">' + e(t("retry")) + '</button>' : '') + '<button type="button" class="btn2" style="margin:0" data-x="1">' + e(t("done")) + '</button></div>'
+        : '<p class="cl-msg" id="tm"></p><div class="cl-act">' + (ROWS.length ? '<button type="button" class="btn2" style="margin:0" data-go="1">' + e(t("createN").replace("%", sel)) + '</button>' : '') + '<button type="button" class="cl-b" data-x="1">' + e(t("close")) + '</button></div>');
+  }
+  function run() {
+    if (busy) return; busy = true; box.dataset.ok = "1";
+    var todo = ROWS.filter(function (r) { return r.on && r.st !== "ok"; }), i = 0;
+    [].forEach.call(c.querySelectorAll("button,input"), function (b) { b.disabled = true; });
+    (function next() {
+      if (i >= todo.length) {
+        var m2 = $("tm") || c.querySelector(".cl-msg"); if (m2) msg(m2, t("linking"));
+        return Promise.all([sb.from("subjects").select("*"), sb.from("profiles").select("*").in("role", ["teacher", "admin"])])
+          .then(function (rs) { return linkTeachers(rs[0].data || [], rs[1].data || []); })
+          .then(function (n) { info = t("linked").replace("%", n); }, function (err) { info = errText4(err); })
+          .then(function () { busy = false; draw(true); });
+      }
+      var r = todo[i++], m = $("tm") || c.querySelector(".cl-msg");
+      if (m) msg(m, t("made").replace("%1", okN()).replace("%2", ROWS.filter(function (x) { return x.on; }).length) + "…");
+      createUser({ login: r.login, pw: r.pw, fio: r.fio, role: "teacher", dept: null, grp: "" })
+        .then(function () { r.st = "ok"; }, function (err) { r.st = (err && err.message) || String(err); })
+        .then(next);
+    })();
+  }
+  function plain() { return ROWS.filter(function (r) { return r.st === "ok"; }).map(function (r, i) { return (i + 1) + ". " + r.fio + " — " + t("lg") + ": " + r.login + ", " + t("pw") + ": " + r.pw; }).join("\n") + "\n" + location.origin + location.pathname; }
+  box.onchange = function (ev) {
+    var el = ev.target;
+    if (el.id === "tall") { ROWS.forEach(function (r) { r.on = el.checked; }); draw(false); }
+    else if (el.dataset && el.dataset.i != null) { ROWS[+el.dataset.i].on = el.checked; var b = c.querySelector("[data-go]"); if (b) b.textContent = t("createN").replace("%", ROWS.filter(function (r) { return r.on; }).length); }
+  };
+  box.onclick = function (ev) {
+    var b = ev.target.closest ? ev.target.closest("button") : null, d = b ? b.dataset : {};
+    if ((ev.target === box || d.x) && !busy) { box.remove(); if (box.dataset.ok) adminV(); return; }
+    if (!b || b.disabled) return;
+    if (d.go) run();
+    if (d.csv) csvDl([["№", t("fio"), t("lg"), t("pw"), t("site")]].concat(ROWS.filter(function (r) { return r.st === "ok"; }).map(function (r, i) { return [i + 1, r.fio, r.login, r.pw, location.origin + location.pathname]; })), "prepodavateli.csv");
+    if (d.cpa && navigator.clipboard) navigator.clipboard.writeText(plain()).then(function () { b.textContent = t("copied"); }, function () {});
+  };
+  draw(false);
 }
 function teacherIndex(staff) {
   var ix = {};
@@ -1024,7 +1106,7 @@ function viaSignUp(o) {
 var TR = { "а": "a", "б": "b", "в": "v", "г": "g", "ғ": "gh", "д": "d", "е": "e", "ё": "yo", "ж": "zh", "з": "z", "и": "i", "ӣ": "i", "й": "y", "к": "k", "қ": "q", "л": "l", "м": "m", "н": "n", "о": "o", "п": "p", "р": "r", "с": "s", "т": "t", "у": "u", "ӯ": "u", "ф": "f", "х": "kh", "ҳ": "h", "ц": "ts", "ч": "ch", "ҷ": "j", "ш": "sh", "щ": "sch", "ъ": "", "ы": "y", "ь": "", "э": "e", "ю": "yu", "я": "ya" };
 function lat(w) { return String(w || "").toLowerCase().split("").map(function (c) { return TR[c] !== undefined ? TR[c] : /[a-z0-9]/.test(c) ? c : ""; }).join(""); }
 function makeLogin(fio, used) {
-  var w = fio.split(/\s+/).filter(Boolean), base = lat(w[0]).slice(0, 22) || "student", i1 = lat(w[1]).charAt(0), i2 = lat(w[2]).charAt(0);
+  var w = fio.split(/\s+/).filter(Boolean), base = lat(w[0]).slice(0, 22) || "student", i1 = lat(String(w[1] || "").charAt(0)), i2 = lat(String(w[2] || "").charAt(0));
   var tries = [i1 ? base + "." + i1 : base, i1 && i2 ? base + "." + i1 + i2 : null].filter(Boolean);
   for (var k = 0; k < tries.length; k++) if (tries[k].length >= 3 && !used[tries[k]]) { used[tries[k]] = 1; return tries[k]; }
   for (var n = 2; n < 1000; n++) { var c = tries[0] + n; if (c.length >= 3 && !used[c]) { used[c] = 1; return c; } }
@@ -1204,7 +1286,7 @@ function adminV() {
     }
     function tbl(id, head, rows) { return '<div class="jt"><table id="' + id + '" class="cl-ut"><tr>' + head.map(function (h, i) { return '<th' + (i ? '' : ' class="nm"') + '>' + e(h) + '</th>'; }).join("") + '<th></th></tr>' + rows + '</table></div>'; }
     var h = (SET.ok ? '' : '<div class="card cl-warn"><p>' + e(t("needSql")) + '</p></div>') +
-      '<div class="cl-bar"><button class="cl-b pri" data-nu="staff">➕ ' + e(t("addStaff")) + '</button><button class="cl-b pri" data-nu="student">➕ ' + e(t("addStud")) + '</button><button class="cl-b pri" data-ng="1">👥 ' + e(t("addGroup")) + '</button></div>' +
+      '<div class="cl-bar"><button class="cl-b pri" data-nu="staff">➕ ' + e(t("addStaff")) + '</button><button class="cl-b pri" data-nu="student">➕ ' + e(t("addStud")) + '</button><button class="cl-b pri" data-ng="1">👥 ' + e(t("addGroup")) + '</button>' + (SCH() ? '<button class="cl-b pri" data-nt="1">👨‍🏫 ' + e(t("tchBtn")) + '</button>' : '') + '</div>' +
       '<input class="cl-in" id="uq" placeholder="🔍 ' + e(t("findU")) + '" value="' + e(AQ) + '" style="max-width:420px">' +
       grpSection() +
       '<h2>' + e(t("staff")) + ' · ' + staff.length + '</h2>' +
@@ -1253,6 +1335,7 @@ function adminV() {
       var d = el.dataset, tr = el.closest("tr"), id = tr && tr.dataset.u, u = id && all.filter(function (x) { return x.id === id; })[0];
       if (d.nu) return userDlg(d.nu);
       if (d.ng) return groupAddDlg(all);
+      if (d.nt) return teachersDlg(all);
       var gtr = el.closest("tr[data-g]");
       if (gtr) {
         var g = gtr.dataset.g, o = GR[g] || {};
